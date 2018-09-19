@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "prettier": "prettier --write src/**/*.js",
-    "precommit": "prettier --write --loglevel warn src/**/*.js && eslint --quiet src/**/*.js"
+    "prettier": "prettier --write '{node,ui}/**/*.js'",
+    "eslint": "eslint --quiet '{node,ui}/**/*.js'",
+    "precommit": "prettier --write --loglevel warn '{node,ui}/**/*.js' && eslint --quiet '{node,ui}/**/*.js'",
+    "parcel": "parcel ui/index.html"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.116",
@@ -12,6 +14,8 @@
     "eslint-config-prettier": "^3.0.1",
     "eslint-plugin-prettier": "^2.6.2",
     "husky": "^0.14.3",
+    "node-sass": "^4.9.3",
+    "parcel-bundler": "^1.9.7",
     "prettier": "^1.14.2"
   },
   "engines": {
@@ -19,7 +23,10 @@
   },
   "dependencies": {
     "bonjour": "^3.5.0",
+    "bootstrap": "^4.1.3",
     "jayson": "^2.0.6",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2"
   }
 }

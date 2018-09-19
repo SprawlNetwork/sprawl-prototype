@@ -1,6 +1,7 @@
 "use strict";
 
 const network = require("./network");
+const { Dex } = require("./dex");
 const { PeerManager } = require("./peers");
 const { RPCServer } = require("./rpc");
 
@@ -31,7 +32,8 @@ class Node {
 
   async _startRPC() {
     const port = await this._getRPCPort();
-    await this._rpcServer.start(port);
+    const dex = new Dex(this._peerManager);
+    await this._rpcServer.start(port, dex);
   }
 
   async _stopRPC() {

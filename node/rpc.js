@@ -3,14 +3,8 @@
 const util = require("util");
 const jayson = require("jayson");
 
-const RPCMethods = {
-  async ping(ip, port) {
-    return "pong";
-  }
-};
-
 class RPCServer {
-  async start(port, methodsObject = RPCMethods) {
+  async start(port, methodsObject) {
     const jaysonServer = jayson.Server();
 
     this._httpServer = jaysonServer.http();
@@ -26,6 +20,8 @@ class RPCServer {
         });
       }
     }
+
+    jaysonServer.method("ping", (args, callback) => callback(null, args));
   }
 
   async stop() {
