@@ -1,3 +1,5 @@
+"use strict";
+
 const { RPCClient } = require("./rpc");
 const net = require("net");
 const Bonjour = require("bonjour");

@@ -1,3 +1,5 @@
+"use strict";
+
 const network = require("./network");
 const { PeerManager } = require("./peers");
 const { RPCServer } = require("./rpc");

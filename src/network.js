@@ -1,3 +1,5 @@
+"use strict";
+
 const net = require("net");
 const os = require("os");
 const _ = require("lodash");
