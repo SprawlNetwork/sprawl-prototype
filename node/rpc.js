@@ -2,14 +2,16 @@
 
 const util = require("util");
 const jayson = require("jayson");
+const cors = require("cors");
+const connect = require("connect");
+const jsonParser = require("body-parser").json;
+const http = require("http");
 
 class RPCServer {
   async start(port, methodsObject) {
     const jaysonServer = jayson.Server();
 
-    this._httpServer = jaysonServer.http();
-    this._httpServer.listen(port);
-    console.log("RPC listening on port", port);
+    const app = connect();
 
     for (const name of Object.keys(methodsObject)) {
       if (!name.startsWith("_")) {
@@ -22,6 +24,15 @@ class RPCServer {
     }
 
     jaysonServer.method("ping", (args, callback) => callback(null, args));
+
+    app.use(cors({ methods: ["POST"] }));
+    app.use(jsonParser());
+    app.use(jaysonServer.middleware());
+
+    this._httpServer = http.createServer(app);
+    this._httpServer.listen(port);
+
+    console.log("RPC listening on port", port);
   }
 
   async stop() {

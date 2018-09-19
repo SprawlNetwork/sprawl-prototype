@@ -1,9 +1,21 @@
 "use strict";
 
+const _ = require("lodash");
+
+const sampleOrder = {
+  maker: "123",
+  taker: "123",
+  weth: 123,
+  zrx: 123,
+  receptionDate: new Date(),
+  expirationDate: new Date()
+};
+
 class Dex {
   constructor(peerManager) {
     this._peerManager = peerManager;
     this._orders = [];
+    this._address = _.random(0, 10000000, false);
   }
 
   _broadcast(funcName, ...params) {
