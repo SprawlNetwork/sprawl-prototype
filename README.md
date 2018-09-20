@@ -3,6 +3,7 @@
 Requirements:
 
 * node.js 8+
+* MetaMask
 
 How to install it:
 
@@ -14,6 +15,8 @@ How to run the node:
 
 1. Open a terminal in the repo
 1. `npm run node`
+
+Multiple nodes can be run in the same computer.
 
 How to run the UI:
 
