@@ -1,6 +1,7 @@
 "use strict";
 
 const network = require("./network");
+const chalk = require("chalk");
 const { Dex } = require("./dex");
 const { PeerManager } = require("./peers");
 const { RPCServer } = require("./rpc");
@@ -43,6 +44,12 @@ class Node {
   async start() {
     await this._startRPC();
     await this._initPeerDiscovery();
+
+    console.log(
+      chalk.green.bold(
+        `Open http://localhost:8080/?127.0.0.1:${await this._getRPCPort()} to connect to this node`
+      )
+    );
   }
 
   async stop() {

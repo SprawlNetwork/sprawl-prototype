@@ -1,119 +1,80 @@
 import React, { Component } from "react";
 import * as datefns from "date-fns";
-import jaysonBrowserClient from "jayson/lib/client/browser";
+import * as _ from "lodash";
 
 import { GlobalError } from "./GlobalError";
 import { MakeOrder } from "./MakeOrder";
 import { NodeInfo } from "./NodeInfo";
 import { Accounts } from "./Accounts";
 import { Orders } from "./Orders";
-
-class RPCClient {
-  constructor(address) {
-    if (!address.startsWith("http://")) {
-      address = "http://" + address;
-    }
-
-    this._client = jaysonBrowserClient((request, callback) => {
-      const options = {
-        method: "POST",
-        body: request,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-
-      fetch(address, options)
-        .then(function(res) {
-          return res.text();
-        })
-        .then(function(text) {
-          callback(null, text);
-        })
-        .catch(function(err) {
-          callback(err);
-        });
-    });
-  }
-
-  async call(funcName, ...params) {
-    return await new Promise((resolve, reject) => {
-      this._client.request(funcName, params, (err, error, result) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        if (error) {
-          reject(new Error(`RPCError[${error.code}]: ${error.message}`));
-          return;
-        }
-
-        console.log(err, error, result);
-        console.log(result);
-        resolve(result);
-      });
-    });
-  }
-}
+import { RPCClient } from "./rpc";
 
 export default class App extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
-      nodeAddress: "127.0.0.1:1337",
-      orders: [
-        {
-          id: 1,
-          maker: "A",
-          taker: "B",
-          weth: 123,
-          zrx: 123,
-          receptionDate: new Date(),
-          expirationDate: datefns.addDays(new Date(), 1)
-        },
-        {
-          id: 2,
-          maker: "A",
-          taker: undefined,
-          weth: 123,
-          zrx: 123,
-          receptionDate: new Date(),
-          expirationDate: datefns.addDays(new Date(), 1)
-        },
-        {
-          id: 3,
-          maker: "A",
-          taker: "B",
-          weth: 123,
-          zrx: 123,
-          receptionDate: new Date(),
-          expirationDate: datefns.subDays(new Date(), 1)
-        },
-        {
-          id: 4,
-          maker: "A",
-          taker: undefined,
-          weth: 123,
-          zrx: 123,
-          receptionDate: new Date(),
-          expirationDate: datefns.subDays(new Date(), 1)
-        }
-      ],
-      connectionError: false
+      endpoint:
+        (window.location.search && window.location.search.substr(1)) ||
+        "127.0.0.1:1337",
+      nodeAddress: undefined,
+      localAddress: undefined,
+      orders: [],
+      connectionError: false,
+      noWeb3: false,
+      makeOrderError: undefined
     };
   }
 
-  onAddressChanged = addr => {
-    console.log(addr);
-    this.setState({ nodeAddress: addr });
-    this.getNodeAddress(addr);
-    console.log(addr);
+  componentDidMount() {
+    this.getNodeAddress(this.state.endpoint);
+    this.loadLocalAccount();
+    this.setupConnectionStateInterval();
+    this.setupOrdersUpdateInterval();
+  }
+
+  componentWillUnmount() {
+    this.removeConnectionStateInterval();
+    this.removeOrdersUpdateInterval();
+  }
+
+  onEndpointChanged = endpoint => {
+    this.setState({ endpoint: endpoint }, () => this.getNodeAddress(endpoint));
+  };
+
+  onOrderMade = ({ wethAmount, zrxAmount, isBuy }) => {
+    const now = new Date();
+
+    return this.callNode("sendOrder", {
+      id: this.state.localAddress + _.random(0, 123123),
+      weth: wethAmount,
+      zrx: zrxAmount,
+      buysZrx: isBuy,
+      maker: this.state.localAddress,
+      creationDate: now,
+      expirationDate: datefns.addDays(now, 1)
+    })
+      .then(order => {
+        this.setState({ orders: [...this.state.orders, order] });
+        this.setState({ makeOrderError: undefined });
+      })
+      .catch(error => {
+        this.setState({ makeOrderError: error });
+        return Promise.reject(error);
+      });
+  };
+
+  onTakeOrder = order => {
+    const takenOrder = { ...order, taker: this.state.localAddress };
+    this.callNode("takeOrder", takenOrder).then(order =>
+      this.setState({
+        orders: [...this.state.orders.filter(o => o.id !== order.id), order]
+      })
+    );
   };
 
   render() {
-    const { orders, nodeAddress, connectionError } = this.state;
+    const { orders, endpoint, connectionError } = this.state;
 
     return (
       <div>
@@ -122,34 +83,117 @@ export default class App extends Component {
         </div>
 
         <NodeInfo
-          nodeAddress={nodeAddress}
-          onAddressChanged={this.onAddressChanged}
+          endpoint={endpoint}
+          onEndpointChanged={this.onEndpointChanged}
         />
 
-        <Accounts />
+        <Accounts
+          nodeAddress={this.state.nodeAddress}
+          localAddress={this.state.localAddress}
+        />
 
-        <Orders orders={orders} />
+        <Orders
+          orders={orders}
+          localAddress={this.state.localAddress}
+          onTakeOrder={this.onTakeOrder}
+        />
 
-        <MakeOrder />
+        <MakeOrder
+          onOrderMade={this.onOrderMade}
+          error={this.state.makeOrderError}
+        />
 
         {connectionError && (
-          <GlobalError msg={"Error connecting with node " + nodeAddress} />
+          <GlobalError msg={"Error connecting with node " + endpoint} />
+        )}
+
+        {this.state.noWeb3 && (
+          <GlobalError
+            msg={"Make sure you have MetaMask installed and unlocked"}
+          />
         )}
       </div>
     );
   }
 
-  getNodeAddress(addr) {
-    const client = new RPCClient(addr);
-    client
-      .call("getAddress")
-      .then(address => {
-        this.setState({ nodeAddress: address, connectionError: false });
-        console.log("A", address);
-      })
-      .catch(err => {
-        console.warn("Error contacting node", err);
-        this.setState({ connectionError: true });
-      });
+  getNodeAddress() {
+    // If this fails it may not update
+    this.callNode("getAddress").then(addr =>
+      this.setState({ nodeAddress: addr })
+    );
+  }
+
+  loadLocalAccount() {
+    if (window.web3 === undefined || window.web3.eth.accounts.length === 0) {
+      this.setState({ noWeb3: true, localAddress: undefined });
+      window.setTimeout(() => this.loadLocalAccount(), 1000);
+      return;
+    }
+
+    this.setState({ noWeb3: false, localAddress: window.web3.eth.accounts[0] });
+  }
+
+  callNode(funcName, ...params) {
+    const client = new RPCClient(this.state.endpoint);
+
+    return client.call(funcName, ...params);
+  }
+
+  setupConnectionStateInterval() {
+    const TIME_BETWEEN_PINGS = 5000;
+    const updateConnectionState = () => {
+      this.callNode("ping")
+        .then(
+          () =>
+            this.state.connectionError &&
+            this.setState({ connectionError: false })
+        )
+        .catch(
+          () =>
+            this.state.connectionError ||
+            this.setState({ connectionError: true })
+        )
+        .then(() => setTimeout(updateConnectionState, TIME_BETWEEN_PINGS));
+    };
+
+    this._connectionStateInterval = setTimeout(updateConnectionState, 0);
+  }
+
+  removeConnectionStateInterval() {
+    if (this._connectionStateInterval !== undefined) {
+      clearTimeout(this._connectionStateInterval);
+      this._connectionStateInterval = undefined;
+    }
+  }
+
+  setupOrdersUpdateInterval() {
+    const TIME_BETWEEN_UPDATES = 1000;
+    const updateOrders = () => {
+      this.callNode("getOrders")
+        .then(orders => {
+          if (this.hasNewOrdersOrUpdatedOrders(orders)) {
+            this.setState({ orders });
+          }
+        })
+        .catch(() => {})
+        .then(() => setTimeout(updateOrders, TIME_BETWEEN_UPDATES));
+    };
+
+    this._updateOrdersInterval = setTimeout(updateOrders, 0);
+  }
+
+  removeOrdersUpdateInterval() {
+    if (this._updateOrdersInterval !== undefined) {
+      clearTimeout(this._updateOrdersInterval);
+      this._updateOrdersInterval = undefined;
+    }
+  }
+
+  hasNewOrdersOrUpdatedOrders(orders) {
+    if (orders.length !== this.state.orders.length) {
+      return true;
+    }
+
+    return !_.isEqual(orders.sort(), this.state.orders.sort());
   }
 }

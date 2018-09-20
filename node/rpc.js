@@ -1,38 +1,95 @@
 "use strict";
 
+const { serialize, unserialize } = require("../common/serialization");
+
 const util = require("util");
 const jayson = require("jayson");
 const cors = require("cors");
 const connect = require("connect");
 const jsonParser = require("body-parser").json;
 const http = require("http");
+const errorhandler = require("errorhandler");
+const morgan = require("morgan");
+const chalk = require("chalk");
 
 class RPCServer {
   async start(port, methodsObject) {
-    const jaysonServer = jayson.Server();
-
-    const app = connect();
+    const jaysonServer = jayson.Server(
+      {},
+      {
+        reviver: unserialize,
+        replacer: serialize
+      }
+    );
 
     for (const name of Object.getOwnPropertyNames(methodsObject.__proto__)) {
       if (!name.startsWith("_")) {
         jaysonServer.method(name, (args, callback) => {
           methodsObject[name](...args)
             .then(result => callback(null, result))
-            .catch(err => callback(err));
+            .catch(err => {
+              callback(err);
+              console.error(err);
+            });
         });
       }
     }
 
     jaysonServer.method("ping", (args, callback) => callback(null, args));
 
-    app.use(cors({ methods: ["POST"] }));
+    const app = connect();
+    app.use(errorhandler());
     app.use(jsonParser());
+    app.use(
+      morgan(
+        function(tokens, req, res) {
+          const methodName =
+            req.method === "POST" && req.body && req.body.method
+              ? req.body.method
+              : "";
+
+          const methodExists =
+            Object.getOwnPropertyNames(methodsObject.__proto__).includes(
+              methodName
+            ) || methodName === "ping";
+
+          const notFound = methodName !== "" && !methodExists;
+
+          const method = methodName + (notFound ? " [NOT FOUND]" : "");
+
+          const userAgent = tokens["user-agent"](req);
+          const formattedUserAgent =
+            userAgent.length > 30 ? userAgent.substr(0, 27) + "..." : userAgent;
+
+          const msg = [
+            "[" + new Date().toLocaleString() + "]",
+            tokens.method(req, res),
+            tokens.url(req, res),
+            method,
+            "-",
+            formattedUserAgent
+          ].join(" ");
+
+          if (notFound) {
+            return chalk.red(msg);
+          }
+
+          if (methodName !== "") {
+            return chalk.cyan(msg);
+          }
+
+          return chalk.yellow(msg);
+        },
+        { immediate: true }
+      )
+    );
+    app.use(cors({ methods: ["POST"] }));
     app.use(jaysonServer.middleware());
 
     this._httpServer = http.createServer(app);
     this._httpServer.listen(port);
 
-    console.log("RPC listening on port", port);
+    console.log(chalk.green.bold("RPC listening on port " + port));
   }
 
   async stop() {
@@ -41,10 +98,16 @@ class RPCServer {
 }
 
 class RPCClient {
-  constructor(ip, port) {
-    this._ip = ip;
-    this._port = port;
-    const client = jayson.client.http(`http://${this._ip}:${this._port}`);
+  constructor(localPeerName, ip, port) {
+    const client = jayson.client.http({
+      host: ip,
+      port: port,
+      headers: {
+        "User-Agent": localPeerName
+      },
+      reviver: unserialize,
+      replacer: serialize
+    });
     this._request = util.promisify(client.request.bind(client));
   }
 

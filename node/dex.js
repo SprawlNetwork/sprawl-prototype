@@ -2,20 +2,12 @@
 
 const _ = require("lodash");
 
-const sampleOrder = {
-  maker: "123",
-  taker: "123",
-  weth: 123,
-  zrx: 123,
-  receptionDate: new Date(),
-  expirationDate: new Date()
-};
-
 class Dex {
   constructor(peerManager) {
     this._peerManager = peerManager;
-    this._orders = [];
+    this._orders = new Map();
     this._address = _.random(0, 10000000, false);
+    this._peerManager.on("newPeer", peer => this._addPeerOrders(peer));
   }
 
   _broadcast(funcName, ...params) {
@@ -31,7 +23,7 @@ class Dex {
   }
 
   async getOrders() {
-    return this._orders;
+    return _.sortBy(Array.from(this._orders.values()), o => o.receptionDate);
   }
 
   async receiveOrder(order) {
@@ -39,22 +31,70 @@ class Dex {
       throw new Error("Invalid order ", order);
     }
 
-    this._orders.push(order);
-    this._broadcast("receiveOrder", order);
+    if (!this._orders.has(order.id)) {
+      this._addOrder(order);
+      this._broadcast("receiveOrder", order);
+    }
+
+    return order;
+  }
+
+  _addOrder(order) {
+    order.receptionDate = new Date();
+    this._orders.set(order.id, order);
   }
 
   async sendOrder(order) {
-    // TODO: This is called by the user, it's not quiet the same than receive
     return await this.receiveOrder(order);
   }
 
   async takeOrder(order) {
-    // TODO: flag it as taken?
+    if (!this._orders.has(order.id)) {
+      throw new Error("Trying to take non-existent order");
+    }
+
+    if (
+      this._orders.get(order.id).taker &&
+      this._orders.get(order.id).taker !== order.taker
+    ) {
+      throw new Error("Order already taken");
+    }
+
+    this._orders.get(order.id).taker = order.taker;
+
+    this._broadcast("tookOrder", order);
+
+    return this._orders.get(order.id);
+  }
+
+  async tookOrder(order) {
+    if (this._orders.get(order.id).taker === undefined) {
+      this._orders.get(order.id).taker = order.taker;
+      this._broadcast("tookOrder", order);
+    }
   }
 
   async getAddress() {
-    console.log("asdasd");
     return this._address;
+  }
+
+  _isValidOrder(order) {
+    return true;
+  }
+
+  _addPeerOrders(peer) {
+    peer
+      .call("getOrders")
+      .then(orders => {
+        for (const order of orders) {
+          if (this._orders.has(order.id)) {
+            continue;
+          }
+
+          this._addOrder(order);
+        }
+      })
+      .catch(error => console.warn("Error getting orders from ", peer, error));
   }
 }
 

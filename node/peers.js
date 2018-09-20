@@ -1,5 +1,6 @@
 "use strict";
 
+const EventEmitter = require("events");
 const { RPCClient } = require("./rpc");
 const net = require("net");
 const Bonjour = require("bonjour");
@@ -10,10 +11,10 @@ const KEEP_ALIVE_INTERVAL = 2000;
 const MAX_PING_ERRORS = 5;
 
 class Peer {
-  constructor(ip, port) {
+  constructor(localPeerName, ip, port) {
     this.ip = ip;
     this.port = port;
-    this._rpcClient = new RPCClient(ip, port);
+    this._rpcClient = new RPCClient(localPeerName, ip, port);
   }
 
   async call(funcName, ...params) {
@@ -25,8 +26,9 @@ class Peer {
   }
 }
 
-class PeerManager {
+class PeerManager extends EventEmitter {
   constructor() {
+    super();
     this._peers = [];
     this._peersErrorCount = new WeakMap();
   }
@@ -107,6 +109,7 @@ class PeerManager {
   }
 
   _addPeer(peer) {
+    this.emit("newPeer", peer);
     this._peers.push(peer);
   }
 
@@ -118,7 +121,7 @@ class PeerManager {
     const ip = service.addresses.filter(addr => net.isIPv4(addr))[0];
     const port = service.port;
 
-    return new Peer(ip, port);
+    return new Peer(this._getPeerName(), ip, port);
   }
 
   _startKeepAlive() {

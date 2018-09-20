@@ -1,6 +1,6 @@
 import React from "react";
 
-export function NodeInfo({ nodeAddress, onAddressChanged }) {
+export function NodeInfo({ endpoint, onEndpointChanged }) {
   return (
     <div className="container mt-4">
       <div className="input-group">
@@ -10,8 +10,8 @@ export function NodeInfo({ nodeAddress, onAddressChanged }) {
         <input
           type="text"
           className="form-control"
-          value={nodeAddress}
-          onChange={e => onAddressChanged(e.target.value)}
+          value={endpoint}
+          onChange={e => onEndpointChanged(e.target.value)}
         />
       </div>
     </div>

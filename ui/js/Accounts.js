@@ -1,18 +1,16 @@
 import React from "react";
 
-export function Accounts() {
+export function Accounts({ nodeAddress, localAddress }) {
   return (
     <div className="container mt-4">
       <h2>Accounts</h2>
 
       <div className="mt-4">
         <div>
-          <label>Local address</label>:
-          0xa6db372ad0e30fe6c4b2764596b3ddd8e3e367b6
+          <label>Local address</label>: {localAddress}
         </div>
         <div>
-          <label>Node's address</label>:
-          0xa6db372ad0e30fe6c4b2764596b3ddd8e3e367b6
+          <label>Node's address</label>: {nodeAddress}
         </div>
       </div>
 
