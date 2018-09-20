@@ -54,7 +54,7 @@ export function Orders({ orders }) {
     <div className="container mt-4">
       <h2>Orders</h2>
 
-      <table className="table table-hover table-striped">
+      <table className="table table-hover table-striped mt-4">
         <thead>
           <tr>
             <th scope="col">#</th>
