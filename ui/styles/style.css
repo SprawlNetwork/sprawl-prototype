@@ -1,4 +1,4 @@
-@import "bootstrap/dist/css/bootstrap.css";
+@import "~bootstrap/dist/css/bootstrap.css";
 
 label {
   font-weight: bold;
@@ -8,14 +8,14 @@ a:hover {
   font-weight: bold;
 }
 
-.connection-error {
+.globalError {
   position: absolute;
   top: 1rem;
   width: 100%;
   text-align: center;
 }
 
-.connection-error .alert {
+.globalError .alert {
   display: inline-block;
   width: fit-content;
 }

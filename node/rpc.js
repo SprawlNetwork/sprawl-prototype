@@ -13,7 +13,7 @@ class RPCServer {
 
     const app = connect();
 
-    for (const name of Object.keys(methodsObject)) {
+    for (const name of Object.getOwnPropertyNames(methodsObject.__proto__)) {
       if (!name.startsWith("_")) {
         jaysonServer.method(name, (args, callback) => {
           methodsObject[name](...args)

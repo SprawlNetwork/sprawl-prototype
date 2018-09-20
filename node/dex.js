@@ -51,6 +51,11 @@ class Dex {
   async takeOrder(order) {
     // TODO: flag it as taken?
   }
+
+  async getAddress() {
+    console.log("asdasd");
+    return this._address;
+  }
 }
 
 module.exports = { Dex };
