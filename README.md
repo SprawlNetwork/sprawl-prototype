@@ -6,8 +6,8 @@ Requirements:
 
 How to install it:
 
-1. `git clone https://github.com/alcuadrado/gpl-prototype.git`
-1. `cd gpl-prototype`
+1. `git clone https://github.com/alcuadrado/glp-prototype.git`
+1. `cd glp-prototype`
 1. `npm i`
 
 How to run the node:
