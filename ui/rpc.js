@@ -1,5 +1,5 @@
 import jaysonBrowserClient from "jayson/lib/client/browser";
-import { serialize, unserialize } from "../../common/serialization";
+import { serialize, unserialize } from "../common/serialization";
 
 export class RPCClient {
   constructor(address) {
@@ -52,4 +52,10 @@ export class RPCClient {
       });
     });
   }
+}
+
+export async function call(nodeAddress, funcName, ...params) {
+  const client = new RPCClient(nodeAddress);
+
+  return client.call(funcName, ...params);
 }

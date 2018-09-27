@@ -1,23 +1,26 @@
 import React, { PureComponent } from "react";
+import { connect } from "react-redux";
+import { makeOrderFailureDismiss } from "../actions/index";
 
-export class MakeOrder extends PureComponent {
+class MakeOrder extends PureComponent {
   onSubmit = e => {
     e.preventDefault();
 
-    this.props
-      .onOrderMade({
-        wethAmount: +this.wethInput.value,
-        zrxAmount: +this.zrxInput.value,
-        isBuy: this.actionSelect.value === "buy"
-      })
-      .then(() => {
-        this.form.reset();
-      })
-      .catch(error => {});
+    this.props.onSubmit({
+      wethAmount: +this.wethInput.value,
+      zrxAmount: +this.zrxInput.value,
+      isBuy: this.actionSelect.value === "buy"
+    });
+
+    this.form.reset();
+  };
+
+  onDismiss = () => {
+    this.props.dispatch(makeOrderFailureDismiss());
   };
 
   render() {
-    let { error } = this.props;
+    let { error, disabled } = this.props;
     return (
       <div className="container mt-5 mb-4">
         <div className="card w-50 m-auto">
@@ -27,6 +30,15 @@ export class MakeOrder extends PureComponent {
             {error && (
               <div className="mt-3 alert alert-danger" role="alert">
                 Error making order
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="alert"
+                  aria-label="Close"
+                  onClick={this.onDismiss}
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
               </div>
             )}
 
@@ -76,7 +88,11 @@ export class MakeOrder extends PureComponent {
               </div>
 
               <div className="text-center">
-                <button type="submit" className="btn btn-primary btn-lg">
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-lg"
+                  disabled={disabled}
+                >
                   Make
                 </button>
               </div>
@@ -87,3 +103,14 @@ export class MakeOrder extends PureComponent {
     );
   }
 }
+
+const mapStateToProps = (
+  { localAccount, connectionError, makeOrderError },
+  { onSubmit }
+) => ({
+  disabled: localAccount.address === undefined || connectionError,
+  error: makeOrderError,
+  onSubmit
+});
+
+export default connect(mapStateToProps)(MakeOrder);

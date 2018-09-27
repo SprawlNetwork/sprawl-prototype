@@ -1,6 +1,6 @@
 import React from "react";
 
-export function GlobalError({ msg }) {
+export default function GlobalError({ msg }) {
   return (
     <div className="globalError">
       <div className="alert alert-danger" role="alert">

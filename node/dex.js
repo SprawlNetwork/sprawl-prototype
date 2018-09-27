@@ -6,7 +6,7 @@ class Dex {
   constructor(peerManager) {
     this._peerManager = peerManager;
     this._orders = new Map();
-    this._address = _.random(0, 10000000, false);
+    this._address = "0x413728293b82f3bf40357e1f63bb563058db03a1";
     this._peerManager.on("newPeer", peer => this._addPeerOrders(peer));
   }
 
@@ -48,23 +48,22 @@ class Dex {
     return await this.receiveOrder(order);
   }
 
-  async takeOrder(order) {
-    if (!this._orders.has(order.id)) {
+  async takeOrder(receivedOrder) {
+    if (!this._orders.has(receivedOrder.id)) {
       throw new Error("Trying to take non-existent order");
     }
 
-    if (
-      this._orders.get(order.id).taker &&
-      this._orders.get(order.id).taker !== order.taker
-    ) {
+    const localOrder = this._orders.get(receivedOrder.id);
+
+    if (localOrder.taker && localOrder.taker !== receivedOrder.taker) {
       throw new Error("Order already taken");
     }
 
-    this._orders.get(order.id).taker = order.taker;
+    localOrder.taker = receivedOrder.taker;
 
-    this._broadcast("tookOrder", order);
+    this._broadcast("tookOrder", receivedOrder);
 
-    return this._orders.get(order.id);
+    return localOrder;
   }
 
   async tookOrder(order) {
