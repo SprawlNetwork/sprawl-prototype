@@ -2,13 +2,16 @@ import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 
 import GlobalError from "../components/GlobalError";
+import AccountCard from "../components/AccountCard";
 
 class Accounts extends PureComponent {
   render() {
     let { localAccount, remoteAccount } = this.props;
 
-    const canShowRemoteInfo =
+    const isRemoteAccountReady =
       !remoteAccount.loading && !remoteAccount.loadFailed;
+
+    const isLocalAccountReady = !!localAccount.ethBalance;
 
     return (
       <>
@@ -21,58 +24,40 @@ class Accounts extends PureComponent {
             </div>
             <div>
               <label>Node's address</label>:{" "}
-              {!canShowRemoteInfo ? "..." : remoteAccount.address}
+              {!isRemoteAccountReady ? "..." : remoteAccount.address}
             </div>
           </div>
 
           <div className="card-deck mt-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">ETH</h5>
-                <div className="card-text">
-                  <label>Balance:</label>{" "}
-                  {localAccount.ethBalance === undefined
-                    ? "..."
-                    : localAccount.ethBalance.toString(10)}
-                </div>
-              </div>
-            </div>
+            <AccountCard
+              title={"ETH"}
+              isReady={isLocalAccountReady}
+              balance={localAccount.ethBalance}
+              withAllowance={false}
+            />
 
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">WETH</h5>
-                <div className="card-text">
-                  <label>Balance:</label> 0.1982312
-                </div>
-                <div className="card-text">
-                  <label>Allowance:</label> ✔
-                </div>
-              </div>
-            </div>
+            <AccountCard
+              title={"WETH"}
+              isReady={isLocalAccountReady}
+              balance={0}
+              withAllowance={true}
+              hasAllowance={true}
+            />
 
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">ZRX</h5>
-                <div className="card-text">
-                  <label>Balance:</label> 0.19823123
-                </div>
-                <div className="card-text">
-                  <label>Allowance:</label> <a href="#">Give allowance</a>
-                </div>
-              </div>
-            </div>
+            <AccountCard
+              title={"ZRX"}
+              isReady={isLocalAccountReady}
+              balance={1}
+              withAllowance={true}
+              hasAllowance={false}
+            />
 
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Node's ETH</h5>
-                <div className="card-text">
-                  <label>Balance:</label>{" "}
-                  {!canShowRemoteInfo
-                    ? "..."
-                    : remoteAccount.ethBalance.toString(10)}
-                </div>
-              </div>
-            </div>
+            <AccountCard
+              title={"Node's ETH"}
+              isReady={isRemoteAccountReady}
+              balance={remoteAccount.ethBalance}
+              withAllowance={false}
+            />
           </div>
         </div>
 
