@@ -7,7 +7,15 @@
     "eslint": "eslint --quiet '{node,ui}/**/*.js'",
     "precommit": "prettier --write --loglevel warn '{node,ui}/**/*.js' && eslint --quiet '{node,ui}/**/*.js'",
     "ui": "cd ui && webpack-dev-server",
-    "node": "cd node && nodemon node/index.js"
+    "node": "cd node && nodemon node/index.js",
+    "download_snapshot": "cross-env download --extract --strip 1 --out 0x_ganache_snapshot ${npm_package_config_snapshot_url}",
+    "restart_blockchain": "cd . && rm -rf 0x_ganache_snapshot && npm run download_snapshot",
+    "ganache-cli": "cross-env ganache-cli --gasLimit 10000000 --noVMErrorsOnRPCResponse --db 0x_ganache_snapshot --noVMErrorsOnRPCResponse -p 8545 --networkId 50 -m \"${npm_package_config_mnemonic}\"",
+    "blockchain": "npm run restart_blockchain && npm run ganache-cli"
+  },
+  "config": {
+    "mnemonic": "concert load couple harbor equip island argue ramp clarify fence smart topic",
+    "snapshot_url": "https://s3.amazonaws.com/testrpc-shapshots/965d6098294beb22292090c461151274ee6f9a26.zip"
   },
   "devDependencies": {
     "@babel/core": "^7.1.0",
@@ -24,11 +32,14 @@
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.2",
     "clean-webpack-plugin": "^0.1.19",
+    "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
+    "download-cli": "^1.1.1",
     "eslint": "^5.6.0",
     "eslint-config-prettier": "^3.0.1",
     "eslint-plugin-babel": "^5.2.0",
     "eslint-plugin-prettier": "^2.6.2",
+    "ganache-cli": "^6.1.8",
     "html-webpack-plugin": "^3.2.0",
     "html-webpack-root-plugin": "^0.10.0",
     "husky": "^0.14.3",

@@ -78,3 +78,6 @@ typings/
 # Webpack
 dist
 ui/dist
+
+#0x ganache
+0x_ganache_snapshot
