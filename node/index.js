@@ -1,4 +1,5 @@
 "use strict";
+require("why-is-node-running");
 
 const { Node } = require("./node");
 

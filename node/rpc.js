@@ -2,6 +2,8 @@
 
 const { serialize, unserialize } = require("../common/serialization");
 
+const WebSocket = require("ws");
+const enableDestroy = require("server-destroy");
 const util = require("util");
 const jayson = require("jayson");
 const cors = require("cors");
@@ -88,12 +90,32 @@ class RPCServer {
 
     this._httpServer = http.createServer(app);
     this._httpServer.listen(port);
+    enableDestroy(this._httpServer);
+
+    // This should probably go somewhere else
+    this._wss = new WebSocket.Server({ server: this._httpServer });
 
     console.log(chalk.green.bold("RPC listening on port " + port));
   }
 
   async stop() {
-    await util.promisify(this._httpServer.close.bind(this._httpServer));
+    if (this._httpServer.listening) {
+      this._wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.close();
+        }
+      });
+
+      this._httpServer.destroy();
+    }
+  }
+
+  bloadcastToClients(msg) {
+    this._wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(msg);
+      }
+    });
   }
 }
 

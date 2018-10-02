@@ -28,7 +28,10 @@ class MakeOrder extends PureComponent {
             <h5 className="card-title">Maker order</h5>
 
             {error && (
-              <div className="mt-3 alert alert-danger" role="alert">
+              <div
+                className="mt-3 alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
                 Error making order
                 <button
                   type="button"

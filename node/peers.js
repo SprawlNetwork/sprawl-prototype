@@ -109,12 +109,19 @@ class PeerManager extends EventEmitter {
   }
 
   _addPeer(peer) {
-    this.emit("newPeer", peer);
     this._peers.push(peer);
+    this.emit("newPeer", peer);
   }
 
   _removePeer(peer) {
-    _.remove(this._peers, p => _.isEqual(p, peer));
+    const index = this._peers.findIndex(
+      p => p.ip === peer.ip && p.port === peer.port
+    );
+
+    if (index !== -1) {
+      this._peers.splice(index, 1);
+      this.emit("peerRemoved", peer);
+    }
   }
 
   _bonjourServiceToPeer(service) {

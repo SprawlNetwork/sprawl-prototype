@@ -1,7 +1,7 @@
 "use strict";
-
 const network = require("./network");
 const chalk = require("chalk");
+const { encode } = require("../common/messages");
 const { Dex } = require("./dex");
 const { PeerManager } = require("./peers");
 const { RPCServer } = require("./rpc");
@@ -33,7 +33,9 @@ class Node {
 
   async _startRPC() {
     const port = await this._getRPCPort();
-    const dex = new Dex(this._peerManager);
+    const dex = new Dex(this._peerManager, msg =>
+      this._rpcServer.bloadcastToClients(encode(msg))
+    );
     await this._rpcServer.start(port, dex);
   }
 
@@ -42,14 +44,19 @@ class Node {
   }
 
   async start() {
-    await this._startRPC();
-    await this._initPeerDiscovery();
+    try {
+      await this._startRPC();
+      await this._initPeerDiscovery();
 
-    console.log(
-      chalk.green.bold(
-        `Open http://localhost:8080/?127.0.0.1:${await this._getRPCPort()} to connect to this node`
-      )
-    );
+      console.log(
+        chalk.green.bold(
+          `Open http://localhost:8080/?127.0.0.1:${await this._getRPCPort()} to connect to this node`
+        )
+      );
+    } catch (error) {
+      console.error("Error starting node", error);
+      await this.stop();
+    }
   }
 
   async stop() {

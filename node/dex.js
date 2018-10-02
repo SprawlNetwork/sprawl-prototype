@@ -1,16 +1,19 @@
 "use strict";
 
 const _ = require("lodash");
+const { newPeer, peerRemoved } = require("../common/messages");
 
 class Dex {
-  constructor(peerManager) {
+  constructor(peerManager, broadcastToClients) {
     this._peerManager = peerManager;
+    this._broadcastToClients = broadcastToClients;
     this._orders = new Map();
     this._address = "0x413728293b82f3bf40357e1f63bb563058db03a1";
-    this._peerManager.on("newPeer", peer => this._addPeerOrders(peer));
+    this._peerManager.on("newPeer", peer => this._onNewPeer(peer));
+    this._peerManager.on("peerRemoved", peer => this._onPeerRemoved(peer));
   }
 
-  _broadcast(funcName, ...params) {
+  _broadcastToPeers(funcName, ...params) {
     this._peerManager
       .getPeers()
       .forEach(p =>
@@ -28,12 +31,12 @@ class Dex {
 
   async receiveOrder(order) {
     if (!this._isValidOrder(order)) {
-      throw new Error("Invalid order ", order);
+      throw new Error("Invalid order " + order);
     }
 
     if (!this._orders.has(order.id)) {
       this._addOrder(order);
-      this._broadcast("receiveOrder", order);
+      this._broadcastToPeers("receiveOrder", order);
     }
 
     return order;
@@ -61,7 +64,7 @@ class Dex {
 
     localOrder.taker = receivedOrder.taker;
 
-    this._broadcast("tookOrder", receivedOrder);
+    this._broadcastToPeers("tookOrder", receivedOrder);
 
     return localOrder;
   }
@@ -69,7 +72,7 @@ class Dex {
   async tookOrder(order) {
     if (this._orders.get(order.id).taker === undefined) {
       this._orders.get(order.id).taker = order.taker;
-      this._broadcast("tookOrder", order);
+      this._broadcastToPeers("tookOrder", order);
     }
   }
 
@@ -94,6 +97,15 @@ class Dex {
         }
       })
       .catch(error => console.warn("Error getting orders from ", peer, error));
+  }
+
+  _onNewPeer(peer) {
+    this._addPeerOrders(peer);
+    this._broadcastToClients(newPeer(`${peer.ip}:${peer.port}`));
+  }
+
+  _onPeerRemoved(peer) {
+    this._broadcastToClients(peerRemoved(`${peer.ip}:${peer.port}`));
   }
 }
 

@@ -12,6 +12,7 @@ import {
   remoteAccountLoadRequest,
   takeOrderRequest
 } from "../actions";
+import Notifications from "./Notifications";
 
 class App extends Component {
   onConnect = nodeAddress => {
@@ -40,30 +41,33 @@ class App extends Component {
     } = this.props;
 
     return (
-      <div>
-        <div className="container">
-          <h1>GLP Prototype</h1>
+      <>
+        <div>
+          <div className="container">
+            <h1>GLP Prototype</h1>
+          </div>
+
+          <NodeInfo
+            endpoint={this.props.nodeAddress}
+            onConnect={this.onConnect}
+          />
+
+          <Accounts />
+
+          <Orders onTakeOrder={this.onTakeOrder} />
+
+          <MakeOrder onSubmit={this.onOrderMade} />
+
+          {remoteAccountUpdateFailed && (
+            <GlobalError msg={"Couldn't connect to remote node, try again"} />
+          )}
+
+          {connectionError && (
+            <GlobalError msg={"Error connecting with node " + nodeAddress} />
+          )}
         </div>
-
-        <NodeInfo
-          endpoint={this.props.nodeAddress}
-          onConnect={this.onConnect}
-        />
-
-        <Accounts />
-
-        <Orders onTakeOrder={this.onTakeOrder} />
-
-        <MakeOrder onSubmit={this.onOrderMade} />
-
-        {remoteAccountUpdateFailed && (
-          <GlobalError msg={"Couldn't connect to remote node, try again"} />
-        )}
-
-        {connectionError && (
-          <GlobalError msg={"Error connecting with node " + nodeAddress} />
-        )}
-      </div>
+        <Notifications />
+      </>
     );
   }
 }

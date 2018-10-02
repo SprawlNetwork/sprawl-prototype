@@ -9,6 +9,7 @@ import { initBackgroundJobs } from "./background";
 
 import App from "./containers/App";
 import { remoteAccountLoadRequest } from "./actions";
+import BackgroundUpdater from "./BackgroundUpdater";
 
 const defaultNodeAddress = window.location.search
   ? window.location.search.substr(1)
@@ -17,7 +18,12 @@ const defaultNodeAddress = window.location.search
 const store = configureStore({ nodeAddress: defaultNodeAddress });
 store.dispatch(remoteAccountLoadRequest(defaultNodeAddress));
 
+// TODO: Move the other backgroundJobs to BackgroundUpdater
 window.addEventListener("load", _ => initBackgroundJobs(store));
+window.addEventListener("load", _ => {
+  const backgroundUpdater = new BackgroundUpdater(store);
+  backgroundUpdater.start();
+});
 
 ReactDOM.render(
   <Provider store={store}>

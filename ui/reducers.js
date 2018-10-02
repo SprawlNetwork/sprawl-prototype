@@ -16,6 +16,11 @@ import {
   MAKE_ORDER_FAILURE_DISMISS,
   TAKE_ORDER_SUCCESS
 } from "./actions";
+import {
+  NOTIFICATION_ADDED,
+  NOTIFICATION_DISMISSED,
+  NOTIFICATION_EXPIRED
+} from "./actions/notifications";
 
 function localAccount(state = { address: undefined }, action) {
   switch (action.type) {
@@ -108,13 +113,29 @@ function makeOrderError(state = false, action) {
   }
 }
 
+function notifications(state = [], action) {
+  switch (action.type) {
+    case NOTIFICATION_ADDED:
+      return [...state, { id: action.id, msg: action.msg }];
+
+    case NOTIFICATION_DISMISSED:
+    case NOTIFICATION_EXPIRED:
+      var i = state.findIndex(n => n.id === action.id);
+      return [...state.slice(0, i), ...state.slice(i + 1)];
+
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   localAccount,
   nodeAddress,
   connectionError,
   remoteAccount,
   orders,
-  makeOrderError
+  makeOrderError,
+  notifications
 });
 
 export default rootReducer;
