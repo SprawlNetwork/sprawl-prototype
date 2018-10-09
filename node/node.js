@@ -1,6 +1,7 @@
 "use strict";
 const network = require("./network");
 const chalk = require("chalk");
+const ethers = require("ethers");
 const { loadOrCreateWallet } = require("./wallet");
 const { encode } = require("../common/messages");
 const { Dex } = require("./dex");
@@ -41,14 +42,19 @@ class Node {
     await this._rpcServer.stop();
   }
 
+  async _getNetworkId() {
+    return process.env.NETWORK_ID || ethers.utils.getNetwork("ropsten").chainId;
+  }
+
   async start() {
     try {
       const wallet = await loadOrCreateWallet();
 
       const dex = new Dex(
+        wallet,
+        this._getNetworkId(),
         this._peerManager,
-        msg => this._rpcServer.bloadcastToClients(encode(msg)),
-        wallet
+        msg => this._rpcServer.bloadcastToClients(encode(msg))
       );
 
       await this._startRPC(dex);

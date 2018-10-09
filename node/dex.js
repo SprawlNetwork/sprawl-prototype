@@ -4,7 +4,8 @@ const _ = require("lodash");
 const { newPeer, peerRemoved } = require("../common/messages");
 
 class Dex {
-  constructor(peerManager, broadcastToClients, wallet) {
+  constructor(wallet, netowrkId, peerManager, broadcastToClients) {
+    this._networkId = netowrkId;
     this._peerManager = peerManager;
     this._broadcastToClients = broadcastToClients;
     this._orders = new Map();
