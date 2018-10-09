@@ -35,7 +35,7 @@ function callEveryNMilliseconds(millis, func, ...params) {
 }
 
 function setupLocalAccountUpdateBackgroundJob(store) {
-  callEveryNMilliseconds(1000, () => {
+  callEveryNMilliseconds(300, () => {
     store.dispatch(updateLocalAccountIfNecessary());
 
     if (store.getState().localAccount.address) {
