@@ -13,6 +13,7 @@ import {
   takeOrderRequest
 } from "../actions";
 import Notifications from "./Notifications";
+import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
 
 class App extends Component {
   onConnect = nodeAddress => {
@@ -37,11 +38,13 @@ class App extends Component {
     const {
       connectionError,
       nodeAddress,
-      remoteAccountUpdateFailed
+      remoteAccountUpdateFailed,
+      metaMaskUnlocked
     } = this.props;
 
     return (
       <>
+        {!metaMaskUnlocked && <UnlockMetaMaskMessage />}
         <div>
           <div className="container">
             <h1>GLP Prototype</h1>
@@ -72,10 +75,16 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = ({ nodeAddress, connectionError, remoteAccount }) => ({
+const mapStateToProps = ({
   nodeAddress,
   connectionError,
-  remoteAccountUpdateFailed: remoteAccount.loadFailed
+  remoteAccount,
+  localAccount
+}) => ({
+  nodeAddress,
+  connectionError,
+  remoteAccountUpdateFailed: remoteAccount.loadFailed,
+  metaMaskUnlocked: localAccount.address !== undefined
 });
 
 export default connect(mapStateToProps)(App);

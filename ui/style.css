@@ -37,3 +37,20 @@ a:hover {
   opacity: 0.01;
   transition: opacity 300ms ease-in;
 }
+
+.overlay-message {
+  background: linear-gradient(#fff, #eee);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
+  z-index: 2000;
+  display: table;
+}
+
+.overlay-message > div {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}

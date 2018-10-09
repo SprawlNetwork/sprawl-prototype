@@ -60,12 +60,6 @@ class Accounts extends PureComponent {
             />
           </div>
         </div>
-
-        {localAccount.address === undefined && (
-          <GlobalError
-            msg={"Make sure you have MetaMask installed and unlocked"}
-          />
-        )}
       </>
     );
   }
