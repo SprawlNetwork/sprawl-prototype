@@ -4,11 +4,11 @@ const _ = require("lodash");
 const { newPeer, peerRemoved } = require("../common/messages");
 
 class Dex {
-  constructor(peerManager, broadcastToClients) {
+  constructor(peerManager, broadcastToClients, wallet) {
     this._peerManager = peerManager;
     this._broadcastToClients = broadcastToClients;
     this._orders = new Map();
-    this._address = "0x413728293b82f3bf40357e1f63bb563058db03a1";
+    this._wallet = wallet;
     this._peerManager.on("newPeer", peer => this._onNewPeer(peer));
     this._peerManager.on("peerRemoved", peer => this._onPeerRemoved(peer));
   }
@@ -77,7 +77,7 @@ class Dex {
   }
 
   async getAddress() {
-    return this._address;
+    return this._wallet.address;
   }
 
   _isValidOrder(order) {

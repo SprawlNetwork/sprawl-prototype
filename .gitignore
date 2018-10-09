@@ -81,3 +81,6 @@ ui/dist
 
 #0x ganache
 0x_ganache_snapshot
+
+#sprawl
+.unsafe-wallet-store

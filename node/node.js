@@ -1,6 +1,7 @@
 "use strict";
 const network = require("./network");
 const chalk = require("chalk");
+const { loadOrCreateWallet } = require("./wallet");
 const { encode } = require("../common/messages");
 const { Dex } = require("./dex");
 const { PeerManager } = require("./peers");
@@ -31,11 +32,8 @@ class Node {
     await this._peerManager.stop();
   }
 
-  async _startRPC() {
+  async _startRPC(dex) {
     const port = await this._getRPCPort();
-    const dex = new Dex(this._peerManager, msg =>
-      this._rpcServer.bloadcastToClients(encode(msg))
-    );
     await this._rpcServer.start(port, dex);
   }
 
@@ -45,7 +43,15 @@ class Node {
 
   async start() {
     try {
-      await this._startRPC();
+      const wallet = await loadOrCreateWallet();
+
+      const dex = new Dex(
+        this._peerManager,
+        msg => this._rpcServer.bloadcastToClients(encode(msg)),
+        wallet
+      );
+
+      await this._startRPC(dex);
       await this._initPeerDiscovery();
 
       console.log(
