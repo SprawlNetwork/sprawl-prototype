@@ -3,7 +3,7 @@ import ReconnectingWebsocket from "reconnecting-websocket";
 import { decode, NEW_PEER, PEER_REMOVED } from "../common/messages";
 import { notificationReceived } from "./actions/notifications";
 
-export default class BackgroundUpdater {
+export default class WebsocketUpdater {
   constructor(store) {
     this.store = store;
     this.setupNewNode();

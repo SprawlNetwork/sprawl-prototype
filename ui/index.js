@@ -9,7 +9,7 @@ import { initBackgroundJobs } from "./background";
 
 import App from "./containers/App";
 import { remoteAccountLoadRequest } from "./actions";
-import BackgroundUpdater from "./BackgroundUpdater";
+import WebsocketUpdater from "./WebsocketUpdater";
 
 const defaultNodeAddress = window.location.search
   ? window.location.search.substr(1)
@@ -18,10 +18,10 @@ const defaultNodeAddress = window.location.search
 const store = configureStore({ nodeAddress: defaultNodeAddress });
 store.dispatch(remoteAccountLoadRequest(defaultNodeAddress));
 
-// TODO: Move the other backgroundJobs to BackgroundUpdater
+// TODO: Move the other backgroundJobs to WebsocketUpdater
 window.addEventListener("load", _ => initBackgroundJobs(store));
 window.addEventListener("load", _ => {
-  const backgroundUpdater = new BackgroundUpdater(store);
+  const backgroundUpdater = new WebsocketUpdater(store);
   backgroundUpdater.start();
 });
 
