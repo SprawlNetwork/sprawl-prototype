@@ -45,10 +45,18 @@ class RPCServer {
     app.use(
       morgan(
         function(tokens, req, res) {
+          if (req.method === "OPTIONS") {
+            return;
+          }
+
           const methodName =
             req.method === "POST" && req.body && req.body.method
               ? req.body.method
               : "";
+
+          if (methodName === "ping") {
+            return;
+          }
 
           const methodExists =
             Object.getOwnPropertyNames(methodsObject.__proto__).includes(
