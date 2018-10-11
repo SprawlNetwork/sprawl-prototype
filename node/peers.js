@@ -1,5 +1,3 @@
-"use strict";
-
 const EventEmitter = require("events");
 const { RPCClient } = require("./rpc");
 const net = require("net");
@@ -10,7 +8,7 @@ const network = require("./network");
 const KEEP_ALIVE_INTERVAL = 2000;
 const MAX_PING_ERRORS = 5;
 
-class Peer {
+export class Peer {
   constructor(localPeerName, ip, port) {
     this.ip = ip;
     this.port = port;
@@ -26,7 +24,7 @@ class Peer {
   }
 }
 
-class PeerManager extends EventEmitter {
+export class PeerManager extends EventEmitter {
   constructor() {
     super();
     this._peers = [];
@@ -52,7 +50,7 @@ class PeerManager extends EventEmitter {
 
     this._stopKeepAlive();
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this._bonjour.unpublishAll(() => {
         this._peers = [];
         this._peersErrorCount = new WeakMap();
@@ -168,5 +166,3 @@ class PeerManager extends EventEmitter {
     this._removePeer(peer);
   }
 }
-
-module.exports = { Peer, PeerManager };

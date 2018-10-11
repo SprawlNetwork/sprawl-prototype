@@ -62,7 +62,7 @@ export const makeOrderRequest = (wethAmount, zrxAmount, isBuy) => async (
   const now = new Date();
 
   const {
-    nodeAddress,
+    nodeConnection: { address: nodeAddress },
     localAccount: { address: localAddress }
   } = getState();
 
@@ -79,6 +79,7 @@ export const makeOrderRequest = (wethAmount, zrxAmount, isBuy) => async (
       expirationDate: datefns.addDays(now, 1)
     });
   } catch (error) {
+    console.error("Error making order", error);
     return dispatch(makeOrderFailure(error));
   }
 
@@ -94,7 +95,7 @@ export const takeOrderSuccess = order => ({
 
 export const takeOrderRequest = order => async (dispatch, getState) => {
   const {
-    nodeAddress,
+    nodeConnection: { address: nodeAddress },
     localAccount: { address: taker }
   } = getState();
 

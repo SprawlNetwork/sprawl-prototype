@@ -9,20 +9,24 @@ import { connect } from "react-redux";
 import {
   makeOrderRequest,
   nodeAddressChanged,
-  remoteAccountLoadRequest,
+  connectionToNodeRequested,
   takeOrderRequest
 } from "../actions";
 import Notifications from "./Notifications";
 import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
+import {
+  couldNotConnectToNode,
+  lostConnectionToNode,
+  metaMaskInWrongNetwork,
+  metaMaskUnlocked
+} from "../selectors";
+import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
 
 class App extends Component {
   onConnect = nodeAddress => {
-    if (
-      this.props.nodeAddress !== nodeAddress ||
-      this.props.remoteAccountUpdateFailed
-    ) {
+    if (this.props.nodeAddress !== nodeAddress || this.props.remoteAccount) {
       this.props.dispatch(nodeAddressChanged(nodeAddress));
-      this.props.dispatch(remoteAccountLoadRequest(nodeAddress));
+      this.props.dispatch(connectionToNodeRequested(nodeAddress));
     }
   };
 
@@ -36,24 +40,29 @@ class App extends Component {
 
   render() {
     const {
-      connectionError,
       nodeAddress,
-      remoteAccountUpdateFailed,
-      metaMaskUnlocked
+      metaMaskUnlocked,
+      couldNotConnectToNode,
+      lostConnectionToNode,
+      metaMaskInWrongNetwork,
+      remoteNetworkId
     } = this.props;
 
     return (
       <>
         {!metaMaskUnlocked && <UnlockMetaMaskMessage />}
+
+        {metaMaskUnlocked &&
+          metaMaskInWrongNetwork && (
+            <ChangeMetaMaskNetwork remoteNetworkId={remoteNetworkId} />
+          )}
+
         <div>
           <div className="container">
             <h1>GLP Prototype</h1>
           </div>
 
-          <NodeInfo
-            endpoint={this.props.nodeAddress}
-            onConnect={this.onConnect}
-          />
+          <NodeInfo endpoint={nodeAddress} onConnect={this.onConnect} />
 
           <Accounts />
 
@@ -61,11 +70,11 @@ class App extends Component {
 
           <MakeOrder onSubmit={this.onOrderMade} />
 
-          {remoteAccountUpdateFailed && (
+          {couldNotConnectToNode && (
             <GlobalError msg={"Couldn't connect to remote node, try again"} />
           )}
 
-          {connectionError && (
+          {lostConnectionToNode && (
             <GlobalError msg={"Error connecting with node " + nodeAddress} />
           )}
         </div>
@@ -75,16 +84,14 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = ({
-  nodeAddress,
-  connectionError,
-  remoteAccount,
-  localAccount
-}) => ({
-  nodeAddress,
-  connectionError,
-  remoteAccountUpdateFailed: remoteAccount.loadFailed,
-  metaMaskUnlocked: localAccount.address !== undefined
+const mapStateToProps = state => ({
+  nodeAddress: state.nodeConnection.address,
+  remoteAccount: state.remote,
+  metaMaskUnlocked: metaMaskUnlocked(state),
+  metaMaskInWrongNetwork: metaMaskInWrongNetwork(state),
+  couldNotConnectToNode: couldNotConnectToNode(state),
+  lostConnectionToNode: lostConnectionToNode(state),
+  remoteNetworkId: state.networks.remote.networkId
 });
 
 export default connect(mapStateToProps)(App);

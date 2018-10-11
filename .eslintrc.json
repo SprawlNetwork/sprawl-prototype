@@ -1,14 +1,25 @@
 {
   "extends": ["eslint:recommended", "prettier"],
-  "parserOptions": {
-    "ecmaVersion": 2017
-  },
   "env": {
     "es6": true
   },
   "rules": {
     "no-console": "off",
     "strict": "error",
-    "no-unused-vars": "warn"
-  }
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "allowImportExportEverywhere": false,
+    "codeFrame": true
+  },
+  "plugins": ["babel"]
 }

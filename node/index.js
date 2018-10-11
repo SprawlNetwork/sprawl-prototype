@@ -1,14 +1,3 @@
-"use strict";
-require("why-is-node-running");
-
-const { Node } = require("./node");
-
-async function main() {
-  const node = new Node();
-
-  process.on("SIGINT", () => node.stop().then(() => process.exit(1)));
-
-  await node.start();
-}
-
-main().catch(console.error);
+// eslint-disable-next-line no-global-assign
+require = require("esm")(module /*, options*/);
+module.exports = require("./main.js");

@@ -1,16 +1,15 @@
-"use strict";
-const network = require("./network");
-const chalk = require("chalk");
-const ethers = require("ethers");
-const { loadOrCreateWallet } = require("./wallet");
-const { encode } = require("../common/messages");
-const { Dex } = require("./dex");
-const { PeerManager } = require("./peers");
-const { RPCServer } = require("./rpc");
+import * as network from "./network";
+import chalk from "chalk";
+import { getNetworkId } from "./eth";
+import { loadOrCreateWallet } from "./wallet";
+import { encode } from "../common/messages";
+import Dex from "./Dex";
+import { PeerManager } from "./peers";
+import { RPCServer } from "./rpc";
 
 const DEFUALT_NODE_PORT = 1337;
 
-class Node {
+export default class Node {
   constructor() {
     this._peerManager = new PeerManager();
     this._rpcServer = new RPCServer();
@@ -42,17 +41,14 @@ class Node {
     await this._rpcServer.stop();
   }
 
-  async _getNetworkId() {
-    return process.env.NETWORK_ID || ethers.utils.getNetwork("ropsten").chainId;
-  }
-
   async start() {
     try {
       const wallet = await loadOrCreateWallet();
+      await this.handleFixture(wallet);
 
       const dex = new Dex(
         wallet,
-        this._getNetworkId(),
+        await getNetworkId(),
         this._peerManager,
         msg => this._rpcServer.bloadcastToClients(encode(msg))
       );
@@ -71,10 +67,26 @@ class Node {
     }
   }
 
+  async handleFixture(wallet) {
+    if ((await getNetworkId()) !== 50) {
+      return;
+    }
+
+    const {
+      sendEtherFromPredefinedAccounts,
+      shouldSetupFixtureData,
+      doesNodeHaveEnoughEther
+    } = require("./fixture");
+
+    if (shouldSetupFixtureData()) {
+      if (!(await doesNodeHaveEnoughEther(wallet.address))) {
+        await sendEtherFromPredefinedAccounts(wallet.address, 1e18);
+      }
+    }
+  }
+
   async stop() {
     await this._stopPeerDiscovery();
     await this._stopRPC();
   }
 }
-
-module.exports = { Node };

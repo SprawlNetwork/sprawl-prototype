@@ -84,3 +84,6 @@ ui/dist
 
 #sprawl
 .unsafe-wallet-store
+
+#admin
+TODO.txt

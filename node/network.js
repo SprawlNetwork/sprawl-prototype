@@ -1,8 +1,6 @@
-"use strict";
-
-const net = require("net");
-const os = require("os");
-const _ = require("lodash");
+import net from "net";
+import os from "os";
+import _ from "lodash";
 
 function isPortAvailable(port) {
   return new Promise((resolve, reject) => {
@@ -25,7 +23,7 @@ function isPortAvailable(port) {
  * @note There's an obvious race condition here. The port given by this function
  * can become unavailable before you use it.
  */
-async function getAvailablePort(firstPortToTry, maxPortsToTry = 100) {
+export async function getAvailablePort(firstPortToTry, maxPortsToTry = 100) {
   for (let i = 0; i < maxPortsToTry; i++) {
     const port = firstPortToTry + i;
     if (await isPortAvailable(port)) {
@@ -36,7 +34,7 @@ async function getAvailablePort(firstPortToTry, maxPortsToTry = 100) {
   throw new Error("No available port found");
 }
 
-function isLocalIp(ip) {
+export function isLocalIp(ip) {
   const interfaces = _.flatten(Object.values(os.networkInterfaces()));
 
   return interfaces
@@ -45,7 +43,7 @@ function isLocalIp(ip) {
     .find(i => i.address === ip);
 }
 
-function getFirstLocalIp() {
+export function getFirstLocalIp() {
   const interfaces = _.flatten(Object.values(os.networkInterfaces()));
 
   return interfaces
@@ -54,5 +52,3 @@ function getFirstLocalIp() {
     .map(i => i.address)
     .sort()[0];
 }
-
-module.exports = { getAvailablePort, isLocalIp, getFirstLocalIp };

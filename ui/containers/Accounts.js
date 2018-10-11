@@ -1,17 +1,12 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 
-import GlobalError from "../components/GlobalError";
 import AccountCard from "../components/AccountCard";
+import Faucet from "../components/Faucet";
 
 class Accounts extends PureComponent {
   render() {
     let { localAccount, remoteAccount } = this.props;
-
-    const isRemoteAccountReady =
-      !remoteAccount.loading && !remoteAccount.loadFailed;
-
-    const isLocalAccountReady = !!localAccount.ethBalance;
 
     return (
       <>
@@ -20,41 +15,39 @@ class Accounts extends PureComponent {
 
           <div className="mt-4">
             <div>
-              <label>Local address</label>: {localAccount.address}
+              <label>Local address</label>: {localAccount.address} <Faucet />
             </div>
             <div>
-              <label>Node's address</label>:{" "}
-              {!isRemoteAccountReady ? "..." : remoteAccount.address}
+              <label>Node&apos;s address</label>:{" "}
+              {remoteAccount.address === undefined
+                ? "..."
+                : remoteAccount.address}
             </div>
           </div>
 
           <div className="card-deck mt-4">
             <AccountCard
               title={"ETH"}
-              isReady={isLocalAccountReady}
               balance={localAccount.ethBalance}
               withAllowance={false}
             />
 
             <AccountCard
               title={"WETH"}
-              isReady={isLocalAccountReady}
-              balance={0}
+              balance={localAccount.wethBalance}
               withAllowance={true}
-              hasAllowance={true}
+              allowance={localAccount.wethAllowance}
             />
 
             <AccountCard
               title={"ZRX"}
-              isReady={isLocalAccountReady}
-              balance={1}
+              balance={localAccount.zrxBalance}
               withAllowance={true}
-              hasAllowance={false}
+              allowance={localAccount.zrxAllowance}
             />
 
             <AccountCard
               title={"Node's ETH"}
-              isReady={isRemoteAccountReady}
               balance={remoteAccount.ethBalance}
               withAllowance={false}
             />

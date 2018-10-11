@@ -1,15 +1,24 @@
-import { getEthBalance } from "../eth";
+import {
+  getEthBalance,
+  getWeth0xProxyAllowance,
+  getWethBalance,
+  getZrx0xProxyAllowance,
+  getZrxBalance
+} from "../../common/eth";
 
-export const LOCAL_ACCOUNT_CHANGED = "LOCAL_ACCOUNT_CHANGED";
+export const LOCAL_ACCOUNT_ADDRESS_CHANGED = "LOCAL_ACCOUNT_ADDRESS_CHANGED";
 
-export const localAccountChanged = address => {
+export const localAccountAddressChanged = address => {
   return {
-    type: LOCAL_ACCOUNT_CHANGED,
+    type: LOCAL_ACCOUNT_ADDRESS_CHANGED,
     address
   };
 };
 
-export const updateLocalAccountIfNecessary = () => (dispatch, getState) => {
+export const updateLocalAccountAddressIfNecessary = () => (
+  dispatch,
+  getState
+) => {
   const {
     localAccount: { address: current }
   } = getState();
@@ -19,35 +28,98 @@ export const updateLocalAccountIfNecessary = () => (dispatch, getState) => {
     return null;
   }
 
-  return dispatch(localAccountChanged(updated));
+  return dispatch(localAccountAddressChanged(updated));
 };
 
-export const LOCAL_ACCOUNT_BALANCE_UPDATED = "LOCAL_ACCOUNT_BALANCE_UPDATED";
+export const LOCAL_ACCOUNT_ETH_BALANCE_UPDATED =
+  "LOCAL_ACCOUNT_ETH_BALANCE_UPDATED";
 
-export const localAccountBalanceUpdated = ethBalance => ({
-  type: LOCAL_ACCOUNT_BALANCE_UPDATED,
+export const localAccountEthBalanceUpdated = ethBalance => ({
+  type: LOCAL_ACCOUNT_ETH_BALANCE_UPDATED,
   ethBalance
 });
 
-export const localAccountBalanceUpdateRequest = () => async (
-  dispatch,
-  getState
-) => {
-  const {
-    localAccount: { address }
-  } = getState();
+export const LOCAL_ACCOUNT_WETH_BALANCE_UPDATED =
+  "LOCAL_ACCOUNT_WETH_BALANCE_UPDATED";
 
-  if (address === undefined) {
-    return null;
-  }
+export const localAccountWethBalanceUpdated = wethBalance => ({
+  type: LOCAL_ACCOUNT_WETH_BALANCE_UPDATED,
+  wethBalance
+});
 
-  const newBalance = await getEthBalance(address);
+export const LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED =
+  "LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED";
 
-  const {
-    localAccount: { ethBalance }
-  } = getState();
+export const localAccountZrxBalanceUpdated = zrxBalance => ({
+  type: LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED,
+  zrxBalance
+});
 
-  if (ethBalance === undefined || !newBalance.eq(ethBalance)) {
-    dispatch(localAccountBalanceUpdated(newBalance));
-  }
-};
+export const localAccountEthBalanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
+  getEthBalance,
+  state => state.localAccount.ethBalance,
+  localAccountEthBalanceUpdated
+);
+
+export const localAccountWethBalanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
+  getWethBalance,
+  state => state.localAccount.wethBalance,
+  localAccountWethBalanceUpdated
+);
+
+export const localAccountZrxBalanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
+  getZrxBalance,
+  state => state.localAccount.zrxBalance,
+  localAccountZrxBalanceUpdated
+);
+
+export const LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED =
+  "LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED";
+
+export const localAccountWethAllowanceUpdated = wethAllowance => ({
+  type: LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED,
+  wethAllowance
+});
+
+export const LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED =
+  "LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED";
+
+export const localAccountZrxAllowanceUpdated = zrxAllowance => ({
+  type: LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED,
+  zrxAllowance
+});
+
+export const localAccountWethAllowanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
+  getWeth0xProxyAllowance,
+  state => state.localAccount.wethAllowance,
+  localAccountWethAllowanceUpdated
+);
+
+export const localAccountZrxAllowanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
+  getZrx0xProxyAllowance,
+  state => state.localAccount.zrxAllowance,
+  localAccountZrxAllowanceUpdated
+);
+
+function createLocalAccountFieldUpdateRequestThunk(
+  updatedValueGetter,
+  currentValueSelector,
+  successActionCreator
+) {
+  return () => async (dispatch, getState) => {
+    const {
+      localAccount: { address }
+    } = getState();
+
+    if (address === undefined) {
+      return null;
+    }
+
+    const updatedValue = await updatedValueGetter(address);
+    const currentValue = currentValueSelector(getState());
+
+    if (currentValue === undefined || !updatedValue.eq(currentValue)) {
+      dispatch(successActionCreator(updatedValue));
+    }
+  };
+}

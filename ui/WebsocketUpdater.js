@@ -2,6 +2,7 @@ import ReconnectingWebsocket from "reconnecting-websocket";
 
 import { decode, NEW_PEER, PEER_REMOVED } from "../common/messages";
 import { notificationReceived } from "./actions/notifications";
+import { nodeAddress } from "./selectors";
 
 export default class WebsocketUpdater {
   constructor(store) {
@@ -10,7 +11,7 @@ export default class WebsocketUpdater {
   }
 
   setupNewNode() {
-    this.currentNodeAddress = this.getNodeAddress();
+    this.currentNodeAddress = nodeAddress(this.store.getState());
     this.connectWebsockets();
   }
 
@@ -19,13 +20,9 @@ export default class WebsocketUpdater {
   }
 
   onStateChanged() {
-    if (this.getNodeAddress() !== this.currentNodeAddress) {
+    if (nodeAddress(this.store.getState()) !== this.currentNodeAddress) {
       this.setupNewNode();
     }
-  }
-
-  getNodeAddress() {
-    return this.store.getState().nodeAddress;
   }
 
   connectWebsockets() {
@@ -35,10 +32,6 @@ export default class WebsocketUpdater {
     }
 
     this.ws = new ReconnectingWebsocket(this.getWsUrl());
-
-    this.ws.onopen = openEvent => {
-      console.log("WebSocket connected to", openEvent.currentTarget.url);
-    };
 
     this.ws.onmessage = messageEvent => {
       if (messageEvent.currentTarget.url === this.getWsUrl()) {
@@ -58,7 +51,7 @@ export default class WebsocketUpdater {
             );
         }
 
-        console.log(msg);
+        console.log("Websocket message received", msg);
       }
     };
 

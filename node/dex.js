@@ -1,11 +1,9 @@
-"use strict";
+import _ from "lodash";
+import { newPeer, peerRemoved } from "../common/messages";
 
-const _ = require("lodash");
-const { newPeer, peerRemoved } = require("../common/messages");
-
-class Dex {
-  constructor(wallet, netowrkId, peerManager, broadcastToClients) {
-    this._networkId = netowrkId;
+export default class Dex {
+  constructor(wallet, networkId, peerManager, broadcastToClients) {
+    this._networkId = networkId;
     this._peerManager = peerManager;
     this._broadcastToClients = broadcastToClients;
     this._orders = new Map();
@@ -77,11 +75,26 @@ class Dex {
     }
   }
 
-  async getAddress() {
-    return this._wallet.address;
+  async faucet(address) {
+    const {
+      shouldSetupFixtureData,
+      sendEtherFromPredefinedAccounts,
+      sendWethFromPredefinedAccounts
+    } = require("./fixture");
+
+    if (!shouldSetupFixtureData()) {
+      throw new Error("No faucet in this network");
+    }
+
+    await sendEtherFromPredefinedAccounts(address, 1e18);
+    await sendWethFromPredefinedAccounts(address, 1e18);
   }
 
-  _isValidOrder(order) {
+  async getNodeInfo() {
+    return { networkId: this._networkId, address: this._wallet.address };
+  }
+
+  _isValidOrder(_order) {
     return true;
   }
 
@@ -109,5 +122,3 @@ class Dex {
     this._broadcastToClients(peerRemoved(`${peer.ip}:${peer.port}`));
   }
 }
-
-module.exports = { Dex };

@@ -1,20 +1,18 @@
-"use strict";
+import { serialize, unserialize } from "../common/serialization";
 
-const { serialize, unserialize } = require("../common/serialization");
+import WebSocket from "ws";
+import enableDestroy from "server-destroy";
+import util from "util";
+import jayson from "jayson";
+import cors from "cors";
+import connect from "connect";
+import { json as jsonParser } from "body-parser";
+import http from "http";
+import errorhandler from "errorhandler";
+import morgan from "morgan";
+import chalk from "chalk";
 
-const WebSocket = require("ws");
-const enableDestroy = require("server-destroy");
-const util = require("util");
-const jayson = require("jayson");
-const cors = require("cors");
-const connect = require("connect");
-const jsonParser = require("body-parser").json;
-const http = require("http");
-const errorhandler = require("errorhandler");
-const morgan = require("morgan");
-const chalk = require("chalk");
-
-class RPCServer {
+export class RPCServer {
   async start(port, methodsObject) {
     const jaysonServer = jayson.Server(
       {},
@@ -107,7 +105,7 @@ class RPCServer {
   }
 
   async stop() {
-    if (this._httpServer.listening) {
+    if (this._httpServer && this._httpServer.listening) {
       this._wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -127,7 +125,7 @@ class RPCServer {
   }
 }
 
-class RPCClient {
+export class RPCClient {
   constructor(localPeerName, ip, port) {
     const client = jayson.client.http({
       host: ip,
@@ -153,5 +151,3 @@ class RPCClient {
     return response.result;
   }
 }
-
-module.exports = { RPCServer, RPCClient };

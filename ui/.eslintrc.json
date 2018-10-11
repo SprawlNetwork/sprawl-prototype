@@ -1,12 +1,15 @@
 {
-  "parser": "babel-eslint",
-  "parserOptions": {
-    "sourceType": "module",
-    "allowImportExportEverywhere": false,
-    "codeFrame": true
-  },
   "env": {
     "browser": true
   },
-  "plugins": ["babel"]
+  "plugins": ["react"],
+  "extends": ["plugin:react/recommended"],
+  "rules": {
+    "react/prop-types": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "16.5"
+    }
+  }
 }

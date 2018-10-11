@@ -1,31 +1,27 @@
 import {
-  updateLocalAccountIfNecessary,
+  updateLocalAccountAddressIfNecessary,
   checkConnectionState,
   remoteAccountBalanceUpdateRequest,
-  localAccountBalanceUpdateRequest,
-  ordersUpdateRequest
+  localAccountEthBalanceUpdateRequest,
+  ordersUpdateRequest,
+  updateLocalNetworkIdIfNecessary,
+  localAccountWethBalanceUpdateRequest,
+  localAccountZrxBalanceUpdateRequest,
+  localAccountWethAllowanceUpdateRequest,
+  localAccountZrxAllowanceUpdateRequest
 } from "./actions";
+import { nodeAddress } from "./selectors";
 
 function shouldPingConnection(state) {
-  // If we couldn't load the remote account there's no need to check the
-  // connection state, something isn't working.
-  return !state.remoteAccount.loading && !state.remoteAccount.loadFailed;
+  return state.nodeConnection.connected;
 }
 
 function shouldUpdateRemoteAccountBalance(state) {
-  return (
-    !state.connectionError &&
-    !state.remoteAccount.loading &&
-    !state.remoteAccount.loadFailed
-  );
+  return state.nodeConnection.connected && state.remoteAccount.address;
 }
 
 function shouldUpdateOrders(state) {
-  return (
-    !state.connectionError &&
-    !state.remoteAccount.loading &&
-    !state.remoteAccount.loadFailed
-  );
+  return state.nodeConnection.connected;
 }
 
 function callEveryNMilliseconds(millis, func, ...params) {
@@ -36,11 +32,21 @@ function callEveryNMilliseconds(millis, func, ...params) {
 
 function setupLocalAccountUpdateBackgroundJob(store) {
   callEveryNMilliseconds(300, () => {
-    store.dispatch(updateLocalAccountIfNecessary());
+    store.dispatch(updateLocalAccountAddressIfNecessary());
 
     if (store.getState().localAccount.address) {
-      store.dispatch(localAccountBalanceUpdateRequest());
+      store.dispatch(localAccountEthBalanceUpdateRequest());
+      store.dispatch(localAccountWethBalanceUpdateRequest());
+      store.dispatch(localAccountZrxBalanceUpdateRequest());
+      store.dispatch(localAccountWethAllowanceUpdateRequest());
+      store.dispatch(localAccountZrxAllowanceUpdateRequest());
     }
+  });
+}
+
+function setupLocalNetworkIdUpdateBackgroundJob(store) {
+  callEveryNMilliseconds(300, () => {
+    store.dispatch(updateLocalNetworkIdIfNecessary());
   });
 }
 
@@ -48,7 +54,7 @@ function setupConnectionStateBackgroundJob(store) {
   callEveryNMilliseconds(1000, () => {
     const state = store.getState();
     if (shouldPingConnection(state)) {
-      store.dispatch(checkConnectionState(state.nodeAddress));
+      store.dispatch(checkConnectionState(nodeAddress(state)));
     }
   });
 }
@@ -65,8 +71,8 @@ function setupRemoteAccountBalanceUpdatesBackgroundJob(store) {
 function setupOrdersUpdateBackgroundJob(store) {
   callEveryNMilliseconds(1000, () => {
     const state = store.getState();
-    if (shouldUpdateRemoteAccountBalance(state)) {
-      store.dispatch(ordersUpdateRequest(state.nodeAddress));
+    if (shouldUpdateOrders(state)) {
+      store.dispatch(ordersUpdateRequest(nodeAddress(state)));
     }
   });
 }
@@ -76,4 +82,5 @@ export function initBackgroundJobs(store) {
   setupLocalAccountUpdateBackgroundJob(store);
   setupRemoteAccountBalanceUpdatesBackgroundJob(store);
   setupOrdersUpdateBackgroundJob(store);
+  setupLocalNetworkIdUpdateBackgroundJob(store);
 }

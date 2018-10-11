@@ -1,12 +1,10 @@
-"use strict";
-
-const ethers = require("ethers");
-const fse = require("fs-extra");
-const chalk = require("chalk");
+import fse from "fs-extra";
+import chalk from "chalk";
+import * as ethers from "ethers";
 
 const WALLET_FILE = ".unsafe-wallet-store";
 
-async function loadOrCreateWallet() {
+export async function loadOrCreateWallet() {
   if (await isWalletSaved()) {
     return loadWallet();
   }
@@ -46,5 +44,3 @@ async function saveWallet(wallet) {
 async function readPrivateKey() {
   return fse.readFile(WALLET_FILE, "utf-8");
 }
-
-module.exports = { loadOrCreateWallet };

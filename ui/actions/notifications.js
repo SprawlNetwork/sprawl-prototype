@@ -1,4 +1,9 @@
-export const notificationReceived = (id, msg) => dispatch => {
+import _ from "lodash";
+
+export const notificationReceived = (
+  id = _.random(1, 1000),
+  msg
+) => dispatch => {
   dispatch(notificationAdded(id, msg));
 
   setTimeout(() => dispatch(notificationExpired(id)), 10000);

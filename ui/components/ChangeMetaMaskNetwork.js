@@ -21,6 +21,6 @@ export default class ChangeMetaMaskNetwork extends Component {
       return "Ropsten";
     }
 
-    return "network 50 on localhost:8545";
+    return "localhost:8545";
   }
 }

@@ -33,9 +33,9 @@ class NodeInfo extends PureComponent {
   }
 }
 
-const mapStateToProps = ({ nodeAddress }, { onConnect }) => ({
+const mapStateToProps = (state, { onConnect }) => ({
   onConnect,
-  nodeAddress
+  nodeAddress: state.nodeConnection.address
 });
 
 export default connect(mapStateToProps)(NodeInfo);
