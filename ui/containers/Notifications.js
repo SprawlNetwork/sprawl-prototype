@@ -7,15 +7,7 @@ import Notification from "./Notification";
 class Notifications extends Component {
   render() {
     return (
-      <div
-        className="d-none d-md-block"
-        style={{
-          position: "absolute",
-          top: "1rem",
-          right: "1rem",
-          width: "auto"
-        }}
-      >
+      <div className="notificationsContainer d-none d-md-block">
         <CSSTransitionGroup
           transitionName="notification"
           transitionEnterTimeout={500}

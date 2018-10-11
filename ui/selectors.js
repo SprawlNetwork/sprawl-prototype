@@ -1,4 +1,5 @@
 import { LOCAL_NETWORK_ID } from "../common/eth";
+import { BigNumber } from "bignumber.js";
 
 export const nodeAddress = state => state.nodeConnection.address;
 
@@ -17,3 +18,17 @@ export const couldNotConnectToNode = state =>
 
 export const lostConnectionToNode = state =>
   state.nodeConnection.connected && state.nodeConnection.error;
+
+export const allowanceIsBigEnough = allowance =>
+  allowance !== undefined &&
+  allowance.gt(
+    new BigNumber(
+      "0x0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    )
+  );
+
+export const hasWethAllowanceError = state =>
+  !!state.localAccount.wethAllowanceError;
+
+export const hasZrxAllowanceError = state =>
+  !!state.localAccount.zrxAllowanceError;

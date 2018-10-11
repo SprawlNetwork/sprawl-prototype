@@ -1,8 +1,14 @@
-import { promisify } from "es6-promisify";
+import { EthHelper } from "../common/eth";
+import * as ethers from "ethers";
 
-export async function getEthBalance(address) {
-  return await promisify(window.web3.eth.getBalance.bind(window.web3.eth))(
-    address,
-    "pending"
+/**
+ * @type EthHelper
+ */
+export let ethHelper;
+
+// This is so wrong
+window.addEventListener("load", () => {
+  ethHelper = new EthHelper(
+    new ethers.providers.Web3Provider(window.web3.currentProvider)
   );
-}
+});

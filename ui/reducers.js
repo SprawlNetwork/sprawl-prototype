@@ -23,7 +23,15 @@ import {
   LOCAL_ACCOUNT_WETH_BALANCE_UPDATED,
   LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED,
   LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED,
-  LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED
+  LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED,
+  WETH_ALLOWANCE_SETTING_STARTED,
+  WETH_ALLOWANCE_SETTING_SUCCESS,
+  ZRX_ALLOWANCE_SETTING_STARTED,
+  ZRX_ALLOWANCE_SETTING_SUCCESS,
+  WETH_ALLOWANCE_SETTING_ERROR,
+  WETH_ALLOWANCE_SETTING_ERROR_DISMISS,
+  ZRX_ALLOWANCE_SETTING_ERROR,
+  ZRX_ALLOWANCE_SETTING_ERROR_DISMISS
 } from "./actions";
 
 function localAccount(
@@ -31,7 +39,8 @@ function localAccount(
     address: undefined,
     ethBalance: undefined,
     wethBalance: undefined,
-    zrxBalance: undefined
+    zrxBalance: undefined,
+    wethAllowanceWaiting: false
   },
   action
 ) {
@@ -53,6 +62,38 @@ function localAccount(
 
     case LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED:
       return { ...state, zrxAllowance: action.zrxAllowance };
+
+    case WETH_ALLOWANCE_SETTING_STARTED:
+      return { ...state, wethAllowanceWaiting: true };
+
+    case WETH_ALLOWANCE_SETTING_SUCCESS:
+      return { ...state, wethAllowanceWaiting: false };
+
+    case WETH_ALLOWANCE_SETTING_ERROR:
+      return {
+        ...state,
+        wethAllowanceWaiting: false,
+        wethAllowanceError: action.error
+      };
+
+    case WETH_ALLOWANCE_SETTING_ERROR_DISMISS:
+      return { ...state, wethAllowanceError: undefined };
+
+    case ZRX_ALLOWANCE_SETTING_STARTED:
+      return { ...state, zrxAllowanceWaiting: true };
+
+    case ZRX_ALLOWANCE_SETTING_SUCCESS:
+      return { ...state, zrxAllowanceWaiting: false };
+
+    case ZRX_ALLOWANCE_SETTING_ERROR:
+      return {
+        ...state,
+        zrxAllowanceWaiting: false,
+        zrxAllowanceError: action.error
+      };
+
+    case ZRX_ALLOWANCE_SETTING_ERROR_DISMISS:
+      return { ...state, zrxAllowanceError: undefined };
 
     default:
       return state;
@@ -110,16 +151,13 @@ function makeOrderError(state = false, action) {
 }
 
 function notifications(state = [], action) {
-  let i;
-
   switch (action.type) {
     case NOTIFICATION_ADDED:
       return [...state, { id: action.id, msg: action.msg }];
 
     case NOTIFICATION_DISMISSED:
     case NOTIFICATION_EXPIRED:
-      i = state.findIndex(n => n.id === action.id);
-      return [...state.slice(0, i), ...state.slice(i + 1)];
+      return state.filter(n => n.id !== action.id);
 
     default:
       return state;
@@ -168,6 +206,23 @@ function nodeConnection(
   }
 }
 
+function errors(
+  state = { allowanceError: undefined, makeOrderError: undefined },
+  action
+) {
+  switch (action.type) {
+    case MAKE_ORDER_FAILURE:
+      return { ...state, makeOrderError: action.error };
+
+    case MAKE_ORDER_SUCCESS:
+    case MAKE_ORDER_FAILURE_DISMISS:
+      return { ...state, makeOrderError: undefined };
+
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   nodeConnection,
   networks,
@@ -175,7 +230,8 @@ const rootReducer = combineReducers({
   remoteAccount,
   orders,
   makeOrderError,
-  notifications
+  notifications,
+  errors
 });
 
 export default rootReducer;

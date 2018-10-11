@@ -9,15 +9,14 @@ function Faucet({ isLocalNetwork, dispatch }) {
   }
 
   return (
-    <span>
-      {" "}
+    <div>
       <button
         className="btn-primary btn-sm"
         onClick={() => dispatch(callFaucet())}
       >
         Load address from faucet
       </button>
-    </span>
+    </div>
   );
 }
 

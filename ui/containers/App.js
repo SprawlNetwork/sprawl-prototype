@@ -10,17 +10,22 @@ import {
   makeOrderRequest,
   nodeAddressChanged,
   connectionToNodeRequested,
-  takeOrderRequest
+  takeOrderRequest,
+  wethAllowanceSettingErrorDismiss,
+  zrxAllowanceSettingErrorDismiss
 } from "../actions";
 import Notifications from "./Notifications";
 import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
 import {
   couldNotConnectToNode,
+  hasWethAllowanceError,
+  hasZrxAllowanceError,
   lostConnectionToNode,
   metaMaskInWrongNetwork,
   metaMaskUnlocked
 } from "../selectors";
 import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
+import AllowanceError from "../components/AllowanceError";
 
 class App extends Component {
   onConnect = nodeAddress => {
@@ -45,7 +50,9 @@ class App extends Component {
       couldNotConnectToNode,
       lostConnectionToNode,
       metaMaskInWrongNetwork,
-      remoteNetworkId
+      remoteNetworkId,
+      hasWethAllowanceError,
+      hasZrxAllowanceError
     } = this.props;
 
     return (
@@ -59,7 +66,7 @@ class App extends Component {
 
         <div>
           <div className="container">
-            <h1>GLP Prototype</h1>
+            <h1>Sprawl</h1>
           </div>
 
           <NodeInfo endpoint={nodeAddress} onConnect={this.onConnect} />
@@ -78,7 +85,20 @@ class App extends Component {
             <GlobalError msg={"Error connecting with node " + nodeAddress} />
           )}
         </div>
+
         <Notifications />
+
+        <AllowanceError
+          isOpen={hasWethAllowanceError}
+          dismiss={() =>
+            this.props.dispatch(wethAllowanceSettingErrorDismiss())
+          }
+        />
+
+        <AllowanceError
+          isOpen={hasZrxAllowanceError}
+          dismiss={() => this.props.dispatch(zrxAllowanceSettingErrorDismiss())}
+        />
       </>
     );
   }
@@ -91,7 +111,9 @@ const mapStateToProps = state => ({
   metaMaskInWrongNetwork: metaMaskInWrongNetwork(state),
   couldNotConnectToNode: couldNotConnectToNode(state),
   lostConnectionToNode: lostConnectionToNode(state),
-  remoteNetworkId: state.networks.remote.networkId
+  remoteNetworkId: state.networks.remote.networkId,
+  hasWethAllowanceError: hasWethAllowanceError(state),
+  hasZrxAllowanceError: hasZrxAllowanceError(state)
 });
 
 export default connect(mapStateToProps)(App);

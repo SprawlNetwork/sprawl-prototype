@@ -19,9 +19,9 @@ const store = configureStore();
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
 store.dispatch(connectionToNodeRequested(defaultNodeAddress));
 
-// TODO: Move the other backgroundJobs to WebsocketUpdater
-window.addEventListener("load", _ => initBackgroundJobs(store));
-window.addEventListener("load", _ => {
+window.addEventListener("load", () => {
+  initBackgroundJobs(store);
+
   const backgroundUpdater = new WebsocketUpdater(store);
   backgroundUpdater.start();
 });

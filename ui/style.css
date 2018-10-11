@@ -20,13 +20,21 @@ a:hover {
   width: fit-content;
 }
 
+.notificationsContainer {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: auto;
+  overflow: hidden;
+}
+
 .notification-enter {
-  opacity: 0.01;
+  margin-top: 100%;
 }
 
 .notification-enter.notification-enter-active {
-  opacity: 1;
-  transition: opacity 500ms ease-in;
+  margin-top: 1rem;
+  transition: margin-top 500ms linear;
 }
 
 .notification-leave {

@@ -4,7 +4,6 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackRootPlugin = require("html-webpack-root-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-const webpack = require("webpack");
 
 module.exports = {
   entry: {
@@ -12,8 +11,7 @@ module.exports = {
   },
   devtool: "eval-source-map",
   devServer: {
-    contentBase: "./dist",
-    hot: true
+    contentBase: "./dist"
   },
   mode: "development",
   module: {
@@ -36,8 +34,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: "GLP"
     }),
-    new HtmlWebpackRootPlugin(),
-    new webpack.HotModuleReplacementPlugin()
+    new HtmlWebpackRootPlugin()
   ],
   output: {
     filename: "[name].bundle.js",

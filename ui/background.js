@@ -27,11 +27,11 @@ function shouldUpdateOrders(state) {
 function callEveryNMilliseconds(millis, func, ...params) {
   func(...params);
 
-  setTimeout(() => callEveryNMilliseconds(millis, func, ...params), millis);
+  setInterval(() => func(...params), millis);
 }
 
 function setupLocalAccountUpdateBackgroundJob(store) {
-  callEveryNMilliseconds(300, () => {
+  callEveryNMilliseconds(1000, () => {
     store.dispatch(updateLocalAccountAddressIfNecessary());
 
     if (store.getState().localAccount.address) {
@@ -45,13 +45,15 @@ function setupLocalAccountUpdateBackgroundJob(store) {
 }
 
 function setupLocalNetworkIdUpdateBackgroundJob(store) {
-  callEveryNMilliseconds(300, () => {
+  //NOTE: This is not necessary ATM, MetaMask reloads your site on network
+  // changes
+  callEveryNMilliseconds(5000, () => {
     store.dispatch(updateLocalNetworkIdIfNecessary());
   });
 }
 
 function setupConnectionStateBackgroundJob(store) {
-  callEveryNMilliseconds(1000, () => {
+  callEveryNMilliseconds(15000, () => {
     const state = store.getState();
     if (shouldPingConnection(state)) {
       store.dispatch(checkConnectionState(nodeAddress(state)));
@@ -69,7 +71,7 @@ function setupRemoteAccountBalanceUpdatesBackgroundJob(store) {
 }
 
 function setupOrdersUpdateBackgroundJob(store) {
-  callEveryNMilliseconds(1000, () => {
+  callEveryNMilliseconds(5000, () => {
     const state = store.getState();
     if (shouldUpdateOrders(state)) {
       store.dispatch(ordersUpdateRequest(nodeAddress(state)));

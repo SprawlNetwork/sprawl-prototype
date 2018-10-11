@@ -3,6 +3,10 @@ import { connect } from "react-redux";
 
 import AccountCard from "../components/AccountCard";
 import Faucet from "../components/Faucet";
+import {
+  localAccountWethAllowanceRequest,
+  localAccountZrxAllowanceRequest
+} from "../actions";
 
 class Accounts extends PureComponent {
   render() {
@@ -15,7 +19,7 @@ class Accounts extends PureComponent {
 
           <div className="mt-4">
             <div>
-              <label>Local address</label>: {localAccount.address} <Faucet />
+              <label>Local address</label>: {localAccount.address}
             </div>
             <div>
               <label>Node&apos;s address</label>:{" "}
@@ -24,6 +28,8 @@ class Accounts extends PureComponent {
                 : remoteAccount.address}
             </div>
           </div>
+
+          <Faucet />
 
           <div className="card-deck mt-4">
             <AccountCard
@@ -37,6 +43,10 @@ class Accounts extends PureComponent {
               balance={localAccount.wethBalance}
               withAllowance={true}
               allowance={localAccount.wethAllowance}
+              waitingAllowance={localAccount.wethAllowanceWaiting}
+              giveAllowance={() =>
+                this.props.dispatch(localAccountWethAllowanceRequest())
+              }
             />
 
             <AccountCard
@@ -44,6 +54,10 @@ class Accounts extends PureComponent {
               balance={localAccount.zrxBalance}
               withAllowance={true}
               allowance={localAccount.zrxAllowance}
+              waitingAllowance={localAccount.zrxAllowanceWaiting}
+              giveAllowance={() =>
+                this.props.dispatch(localAccountZrxAllowanceRequest())
+              }
             />
 
             <AccountCard
@@ -58,9 +72,10 @@ class Accounts extends PureComponent {
   }
 }
 
-const mapStateToProps = ({ localAccount, remoteAccount }) => ({
+const mapStateToProps = ({ localAccount, remoteAccount, errors }) => ({
   localAccount,
-  remoteAccount
+  remoteAccount,
+  allowanceError: errors.allowanceError
 });
 
 export default connect(mapStateToProps)(Accounts);

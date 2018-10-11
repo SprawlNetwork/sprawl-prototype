@@ -1,9 +1,10 @@
 import React, { PureComponent } from "react";
 import { Amount } from "./Amount";
+import { allowanceIsBigEnough } from "../selectors";
 
 export default class AccountCard extends PureComponent {
   render() {
-    const { title, balance, withAllowance, allowance } = this.props;
+    const { title, balance, withAllowance } = this.props;
     return (
       <div className="card">
         <div className="card-body">
@@ -14,12 +15,40 @@ export default class AccountCard extends PureComponent {
           </div>
           {withAllowance && (
             <div className="card-text">
-              <label>Allowance:</label>{" "}
-              {allowance !== undefined ? <Amount units={allowance} /> : "..."}
+              <label>Allowance:</label> {this._renderAllowance()}
             </div>
           )}
         </div>
       </div>
     );
   }
+
+  _renderAllowance() {
+    const { allowance } = this.props;
+    if (this.props.allowance === undefined) {
+      return "...";
+    }
+
+    if (this.props.waitingAllowance) {
+      return "Waiting for confirmation";
+    }
+
+    if (!allowanceIsBigEnough(allowance)) {
+      return (
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={this.onAllowanceClicked}
+        >
+          Give allowance
+        </button>
+      );
+    }
+
+    return "✅";
+  }
+
+  onAllowanceClicked = e => {
+    e.preventDefault();
+    this.props.giveAllowance();
+  };
 }

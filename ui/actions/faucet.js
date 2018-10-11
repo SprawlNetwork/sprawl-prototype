@@ -1,5 +1,9 @@
 import { call } from "../rpc";
 import { notificationReceived } from "./notifications";
+import {
+  localAccountEthBalanceUpdateRequest,
+  localAccountWethBalanceUpdateRequest
+} from "./localAccount";
 
 export const callFaucet = () => async (dispatch, getState) => {
   const {
@@ -14,7 +18,10 @@ export const callFaucet = () => async (dispatch, getState) => {
     return dispatch(notificationReceived(undefined, "Error calling faucet"));
   }
 
+  dispatch(localAccountEthBalanceUpdateRequest());
+  dispatch(localAccountWethBalanceUpdateRequest());
+
   return dispatch(
-    notificationReceived(undefined, "Received funds from faucet")
+    notificationReceived(undefined, "Sending funds from faucet...")
   );
 };
