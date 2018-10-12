@@ -100,6 +100,17 @@ export class EthHelper {
     return (await this._getNetworkId()) === LOCAL_NETWORK_ID;
   }
 
+  async ___testMetamaskBugWithGanache(address) {
+    /*global console*/
+    console.log(await this.get0xERC20ProxyWethAllowance(address));
+    const tx = await this.set0xERC20ProxyWethUnllimitedAllowance(address);
+    console.log(tx);
+    console.log(await this._ethersProvider.waitForTransaction(tx));
+
+    // This call returns an outdated value
+    console.log(await this.get0xERC20ProxyWethAllowance(address));
+  }
+
   _get0xProvider() {
     if (this._0xProvider === undefined) {
       this._0xProvider = this._ethersProviderTo0xProvider(this._ethersProvider);
