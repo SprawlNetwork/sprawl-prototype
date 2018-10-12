@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { newPeer, peerRemoved } from "../common/messages";
+import { BigNumber } from "bignumber.js";
 
 export default class Dex {
   constructor(wallet, networkId, peerManager, broadcastToClients) {

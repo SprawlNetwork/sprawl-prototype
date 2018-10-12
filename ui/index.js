@@ -19,6 +19,9 @@ const store = configureStore();
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
 store.dispatch(connectionToNodeRequested(defaultNodeAddress));
 
+// This is fine :)
+require("./eth");
+
 window.addEventListener("load", () => {
   initBackgroundJobs(store);
 

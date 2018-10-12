@@ -178,8 +178,26 @@ const createSetAllowanceThunk = (
   allowanceUpdateRequestActionCreator
 ) => () => async (dispatch, getState) => {
   const {
-    localAccount: { address }
+    localAccount: { address },
+    remoteAccount: { address: remoteAddress }
   } = getState();
+
+  const signedOrder = await ethHelper.createAndSignOrder(
+    address,
+    remoteAddress,
+    1,
+    2,
+    false
+  );
+
+  const signedTakeOrderTransaction = await ethHelper.signTakeOrderTransaction(
+    address,
+    signedOrder
+  );
+
+  console.log(signedOrder);
+  console.log(signedTakeOrderTransaction);
+  return;
 
   await dispatch(allowanceSettingStartedActionCreator());
 

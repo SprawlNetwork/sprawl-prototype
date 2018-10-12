@@ -15,6 +15,9 @@ import { BigNumber } from "@0xproject/utils";
 import { ContractWrappers } from "@0xproject/contract-wrappers";
 
 import packageJson from "../package.json";
+import { EthHelper } from "../common/eth";
+import * as ethers from "ethers";
+import { getEthereumRPCURL } from "./eth";
 
 const config = {
   TX_DEFAULTS: { gas: 400000 },
@@ -120,4 +123,41 @@ export async function doesNodeHaveEnoughEther(address) {
 
 export function shouldSetupFixtureData() {
   return process.env.LOCAL_NODE;
+}
+
+export function getZrxSellOrders(nodeWallet) {
+  const orders = [];
+
+  return with0xWeb3Wrapper(async (web3, pe) => {
+    const nodeProvider = new ethers.providers.JsonRpcProvider(
+      getEthereumRPCURL()
+    );
+    const nodeHelper = new EthHelper(nodeProvider, nodeWallet);
+
+    const fixtureProvider = new ethers.providers.Web3Provider(pe);
+    const fixtureHelper = new EthHelper(fixtureProvider);
+
+    const addresses = await web3.getAvailableAddressesAsync();
+    const sender = nodeWallet.address.toLowerCase();
+    const maker = addresses[0];
+
+    await fixtureHelper.set0xERC20ProxyZrxUnllimitedAllowance(maker);
+    await fixtureHelper.set0xERC20ProxyWethUnllimitedAllowance(maker);
+
+    const signedOrder = await fixtureHelper.createAndSignOrder(
+      maker,
+      sender,
+      1,
+      1,
+      false
+    );
+
+    const signedTx = await fixtureHelper.signTakeOrderTransaction(
+      maker,
+      signedOrder
+    );
+
+    const tx = await nodeHelper.takeOrder(sender, signedTx);
+    console.log(tx);
+  });
 }

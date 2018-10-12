@@ -75,7 +75,8 @@ export default class Node {
     const {
       sendEtherFromPredefinedAccounts,
       shouldSetupFixtureData,
-      doesNodeHaveEnoughEther
+      doesNodeHaveEnoughEther,
+      getZrxSellOrders
     } = require("./fixture");
 
     if (shouldSetupFixtureData()) {
@@ -83,6 +84,8 @@ export default class Node {
         await sendEtherFromPredefinedAccounts(wallet.address, 1e18);
       }
     }
+
+    await getZrxSellOrders(wallet);
   }
 
   async stop() {

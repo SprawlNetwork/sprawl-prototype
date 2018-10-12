@@ -233,22 +233,6 @@ async function main() {
       addresses[0]
     );
 
-    // await printAddressesBalance(
-    //   [...addresses],
-    //   web3,
-    //   contractWrappers,
-    //   etherTokenAddress,
-    //   zrxTokenAddress
-    // );
-
-    // const txHash = await contractWrappers.exchange.fillOrderAsync(
-    //   signedOrder,
-    //   new BigNumber(1e18),
-    //   nodeWallet.address.toLowerCase(),
-    //   {
-    //     gasLimit: config.TX_DEFAULTS.gas
-    //   }
-    // );
 
     const transactionEncoder = await contractWrappers.exchange.transactionEncoderAsync();
 
