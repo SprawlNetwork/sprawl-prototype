@@ -1,4 +1,4 @@
-# GLP prototype
+# Sprawl prototype
 
 Requirements:
 
@@ -7,8 +7,8 @@ Requirements:
 
 How to install it:
 
-1. `git clone https://github.com/alcuadrado/glp-prototype.git`
-1. `cd glp-prototype`
+1. `git clone https://github.com/alcuadrado/sprawl-prototype.git`
+1. `cd sprawl-prototype`
 1. `npm i`
 
 How to run the node:

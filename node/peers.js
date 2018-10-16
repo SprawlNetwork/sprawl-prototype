@@ -69,11 +69,11 @@ export class PeerManager extends EventEmitter {
   }
 
   _getPeerName() {
-    return "GLP:" + network.getFirstLocalIp() + ":" + this._localPort;
+    return "Sprawl:" + network.getFirstLocalIp() + ":" + this._localPort;
   }
 
   _getPeerBonjourType() {
-    return "GLP";
+    return "Sprawl";
   }
 
   _publishPeer() {
@@ -91,7 +91,7 @@ export class PeerManager extends EventEmitter {
       const peer = this._bonjourServiceToPeer(service);
 
       if (!this.isSelfPeer(peer)) {
-        console.log("Found GLP node:", peer);
+        console.log("Found Sprawl node:", peer);
         this._addPeer(peer);
       }
     });
@@ -100,7 +100,7 @@ export class PeerManager extends EventEmitter {
       const peer = this._bonjourServiceToPeer(service);
 
       if (!this.isSelfPeer(peer)) {
-        console.log("GLP node down:", peer);
+        console.log("Sprawl node down:", peer);
         this._removePeer(peer);
       }
     });

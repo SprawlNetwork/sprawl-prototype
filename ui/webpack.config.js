@@ -32,7 +32,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
-      title: "GLP"
+      title: "Sprawl"
     }),
     new HtmlWebpackRootPlugin()
   ],
