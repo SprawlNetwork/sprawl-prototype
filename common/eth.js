@@ -8,7 +8,8 @@ import {
   assetDataUtils,
   SignerType
 } from "@0xproject/order-utils";
-import { BigNumber } from "bignumber.js";
+import { BigNumber } from "@0xproject/utils";
+
 
 export const LOCAL_NETWORK_ID = 50;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";

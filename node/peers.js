@@ -1,3 +1,5 @@
+import { BigNumber } from "@0xproject/utils";
+
 const EventEmitter = require("events");
 const { RPCClient } = require("./rpc");
 const net = require("net");

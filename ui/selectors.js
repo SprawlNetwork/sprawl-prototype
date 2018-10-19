@@ -1,5 +1,5 @@
 import { LOCAL_NETWORK_ID } from "../common/eth";
-import { BigNumber } from "bignumber.js";
+import { BigNumber } from "@0xproject/utils";
 
 export const nodeAddress = state => state.nodeConnection.address;
 

@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { BigNumber } from "bignumber.js";
+import { BigNumber } from "@0xproject/utils";
 
 function isBignumberish(v) {
   if (!_.isObject(v)) {
