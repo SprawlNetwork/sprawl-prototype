@@ -47,7 +47,7 @@ function setupLocalAccountUpdateBackgroundJob(store) {
 function setupLocalNetworkIdUpdateBackgroundJob(store) {
   //NOTE: This is not necessary ATM, MetaMask reloads your site on network
   // changes
-  callEveryNMilliseconds(5000, () => {
+  callEveryNMilliseconds(500, () => {
     store.dispatch(updateLocalNetworkIdIfNecessary());
   });
 }
