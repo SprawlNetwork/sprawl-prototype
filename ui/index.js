@@ -8,7 +8,7 @@ import configureStore from "./configureStore";
 import { initBackgroundJobs } from "./background";
 
 import App from "./containers/App";
-import { connectionToNodeRequested, nodeAddressChanged } from "./actions";
+import { nodeAddressChanged } from "./actions";
 import WebsocketUpdater from "./WebsocketUpdater";
 
 const defaultNodeAddress = window.location.search
@@ -17,7 +17,6 @@ const defaultNodeAddress = window.location.search
 
 const store = configureStore();
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
-store.dispatch(connectionToNodeRequested(defaultNodeAddress));
 
 // This is fine ☕️🔥
 import "./eth";
