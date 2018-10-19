@@ -19,7 +19,7 @@ const store = configureStore();
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
 store.dispatch(connectionToNodeRequested(defaultNodeAddress));
 
-// This is fine :)
+// This is fine ☕️🔥
 import "./eth";
 
 window.addEventListener("load", () => {
