@@ -11,7 +11,6 @@ const DEFUALT_NODE_PORT = 1337;
 
 export default class Node {
   constructor() {
-    this._peerManager = new PeerManager();
     this._rpcServer = new RPCServer();
   }
 
@@ -25,11 +24,13 @@ export default class Node {
 
   async _initPeerDiscovery() {
     const port = await this._getRPCPort();
-    await this._peerManager.start(port);
+    const peerManager = await this._getPeerManager();
+    await peerManager.start(port);
   }
 
   async _stopPeerDiscovery() {
-    await this._peerManager.stop();
+    const peerManager = await this._getPeerManager();
+    await peerManager.stop();
   }
 
   async _startRPC(dex) {
@@ -41,19 +42,36 @@ export default class Node {
     await this._rpcServer.stop();
   }
 
+  async _getWallet() {
+    if (this._wallet === undefined) {
+      this._wallet = await loadOrCreateWallet();
+    }
+
+    return this._wallet;
+  }
+
+  async _getPeerManager() {
+    if (this._peerManager === undefined) {
+      const wallet = await this._getWallet();
+      this._peerManager = new PeerManager(wallet);
+    }
+
+    return this._peerManager;
+  }
+
   async start() {
     try {
-      const wallet = await loadOrCreateWallet();
-      await this.handleFixture(wallet);
+      const peerManager = await this._getPeerManager();
+      const wallet = await this._getWallet();
 
-      const dex = new Dex(
-        wallet,
-        await getNetworkId(),
-        this._peerManager,
-        msg => this._rpcServer.bloadcastToClients(encode(msg))
+      this._dex = new Dex(wallet, await getNetworkId(), peerManager, msg =>
+        this._rpcServer.bloadcastToClients(encode(msg))
       );
+      this._dex._start();
 
-      await this._startRPC(dex);
+      await this.handleFixture(wallet, this._dex);
+
+      await this._startRPC(this._dex);
       await this._initPeerDiscovery();
 
       console.log(
@@ -67,7 +85,7 @@ export default class Node {
     }
   }
 
-  async handleFixture(wallet) {
+  async handleFixture(wallet, dex) {
     if ((await getNetworkId()) !== 50) {
       return;
     }
@@ -85,11 +103,16 @@ export default class Node {
       }
     }
 
-    await getZrxSellOrders(wallet);
+    const orders = await getZrxSellOrders(wallet);
+
+    for (const order of orders) {
+      await dex.receiveOrder(order);
+    }
   }
 
   async stop() {
     await this._stopPeerDiscovery();
     await this._stopRPC();
+    this._dex._stop();
   }
 }

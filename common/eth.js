@@ -9,7 +9,7 @@ import {
   SignerType
 } from "@0xproject/order-utils";
 import { BigNumber } from "@0xproject/utils";
-
+import * as datefns from "date-fns";
 
 export const LOCAL_NETWORK_ID = 50;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -28,12 +28,37 @@ export class EthHelper {
     return this._ethersProvider.getBalance(address);
   }
 
-  async getWethPendingBalance(address) {
-    return this._getPendingTokenBalance(await this.getWethAddress(), address);
+  async getWethBalance(address) {
+    return this._getTokenBalance(await this.getWethAddress(), address);
   }
 
-  async getZrxPendingBalance(address) {
-    return this._getPendingTokenBalance(await this.getZrxAddress(), address);
+  async getZrxBalance(address) {
+    return this._getTokenBalance(await this.getZrxAddress(), address);
+  }
+
+  async getTokenSymbol(tokenAddress) {
+    const token = new ethers.Contract(
+      tokenAddress,
+      [
+        {
+          constant: true,
+          inputs: [],
+          name: "symbol",
+          outputs: [
+            {
+              name: "",
+              type: "string"
+            }
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function"
+        }
+      ],
+      this._ethersProvider
+    );
+
+    return token.symbol();
   }
 
   async get0xERC20ProxyWethAllowance(address) {
@@ -121,9 +146,34 @@ export class EthHelper {
     zrxAmount,
     isZrxPurchaseOrder
   ) {
-    const expirationDate = new BigNumber(
-      Math.floor(new Date().getTime() / 1000) + 3600 * 24 * 365
-    );
+    if (isZrxPurchaseOrder) {
+      const wethBalance = await this.getWethBalance(makerAddress);
+      const wethAllowance = await this.get0xERC20ProxyWethAllowance(
+        makerAddress
+      );
+
+      if (wethBalance.lt(wethAmount)) {
+        throw new Error("Not enough funds");
+      }
+
+      if (wethAllowance.lt(wethAmount)) {
+        throw new Error("Not enough allowance");
+      }
+    } else {
+      const zrxBalance = await this.getZrxBalance(makerAddress);
+      const zrxAllowance = await this.get0xERC20ProxyZrxAllowance(makerAddress);
+
+      if (zrxBalance.lt(zrxAmount)) {
+        throw new Error("Not enough funds");
+      }
+
+      if (zrxAllowance.lt(zrxAmount)) {
+        throw new Error("Not enough allowance");
+      }
+    }
+
+    const tomorrow = datefns.addDays(new Date(), 1);
+    const expirationDate = new BigNumber(Math.floor(tomorrow.getTime() / 1000));
 
     const wrapper = await this._getContractsWrapper();
 
@@ -207,11 +257,21 @@ export class EthHelper {
       signedTakeOrderTransaction.takerAddress,
       signedTakeOrderTransaction.data,
       signedTakeOrderTransaction.signature,
-      senderAddress,
+      senderAddress.toLowerCase(),
       {
         gasLimit: TAKE_ORDER_GAS_LIMIT
       }
     );
+  }
+
+  async isOrderFilled(signedOrder) {
+    const wrapper = await this._getContractsWrapper();
+    const orderStatus = await wrapper.exchange.getOrderInfoAsync(signedOrder, {
+      defaultBlock: "latest"
+    });
+    console.log(orderStatus);
+
+    return orderStatus.orderStatus === 5;
   }
 
   _generatePseudoRandomSalt() {
@@ -249,6 +309,9 @@ export class EthHelper {
     return this._networkId;
   }
 
+  /**
+   * @returns {Promise<ContractWrappers>}
+   */
   async _getContractsWrapper() {
     if (this._contractsWrapper === undefined) {
       this._contractsWrapper = new ContractWrappers(this._get0xProvider(), {
@@ -323,18 +386,14 @@ export class EthHelper {
     };
   }
 
-  async _getPendingTokenBalance(tokenAddress, address) {
+  async _getTokenBalance(tokenAddress, address) {
     const token = new ethers.Contract(
       tokenAddress,
       ERC20Artifact.compilerOutput.abi,
       this._ethersProvider
     );
 
-    const data = token.interface.functions.balanceOf.encode([address]);
-
-    return this._ethersProvider
-      .send("eth_call", [{ to: tokenAddress, data }, "pending"])
-      .then(r => new BigNumber(r));
+    return token.functions.balanceOf(address).then(v => new BigNumber(v));
   }
 
   async _getTokenAllowance(tokenAddress, tokensOwner, approvedAddress) {

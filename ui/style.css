@@ -62,3 +62,16 @@ a:hover {
   vertical-align: middle;
   text-align: center;
 }
+
+.orders {
+  text-align: center;
+}
+
+.orders td, .orders th {
+  vertical-align: middle;
+}
+
+.order-date {
+  font-size: 0.85em;
+
+}

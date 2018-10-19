@@ -4,14 +4,20 @@ import { allowanceIsBigEnough } from "../selectors";
 
 export default class AccountCard extends PureComponent {
   render() {
-    const { title, balance, withAllowance } = this.props;
+    const { symbol, balance, withAllowance } = this.props;
+    const title = this.props.title || symbol;
+
     return (
       <div className="card">
         <div className="card-body">
           <h5 className="card-title">{title}</h5>
           <div className="card-text">
             <label>Balance:</label>{" "}
-            {balance !== undefined ? <Amount units={balance} /> : "..."}
+            {balance !== undefined ? (
+              <Amount units={balance} symbol={symbol} />
+            ) : (
+              "..."
+            )}
           </div>
           {withAllowance && (
             <div className="card-text">

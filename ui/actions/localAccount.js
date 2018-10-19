@@ -56,13 +56,13 @@ export const localAccountEthBalanceUpdateRequest = createLocalAccountFieldUpdate
 );
 
 export const localAccountWethBalanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
-  address => ethHelper.getWethPendingBalance(address),
+  address => ethHelper.getWethBalance(address),
   state => state.localAccount.wethBalance,
   localAccountWethBalanceUpdated
 );
 
 export const localAccountZrxBalanceUpdateRequest = createLocalAccountFieldUpdateRequestThunk(
-  address => ethHelper.getZrxPendingBalance(address),
+  address => ethHelper.getZrxBalance(address),
   state => state.localAccount.zrxBalance,
   localAccountZrxBalanceUpdated
 );
@@ -178,26 +178,8 @@ const createSetAllowanceThunk = (
   allowanceUpdateRequestActionCreator
 ) => () => async (dispatch, getState) => {
   const {
-    localAccount: { address },
-    remoteAccount: { address: remoteAddress }
+    localAccount: { address }
   } = getState();
-
-  const signedOrder = await ethHelper.createAndSignOrder(
-    address,
-    remoteAddress,
-    1,
-    2,
-    false
-  );
-
-  const signedTakeOrderTransaction = await ethHelper.signTakeOrderTransaction(
-    address,
-    signedOrder
-  );
-
-  console.log(signedOrder);
-  console.log(signedTakeOrderTransaction);
-  return;
 
   await dispatch(allowanceSettingStartedActionCreator());
 

@@ -20,7 +20,7 @@ store.dispatch(nodeAddressChanged(defaultNodeAddress));
 store.dispatch(connectionToNodeRequested(defaultNodeAddress));
 
 // This is fine :)
-require("./eth");
+import "./eth";
 
 window.addEventListener("load", () => {
   initBackgroundJobs(store);

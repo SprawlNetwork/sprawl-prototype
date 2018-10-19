@@ -33,13 +33,13 @@ class Accounts extends PureComponent {
 
           <div className="card-deck mt-4">
             <AccountCard
-              title={"ETH"}
+              symbol={"ETH"}
               balance={localAccount.ethBalance}
               withAllowance={false}
             />
 
             <AccountCard
-              title={"WETH"}
+              symbol={"WETH"}
               balance={localAccount.wethBalance}
               withAllowance={true}
               allowance={localAccount.wethAllowance}
@@ -50,7 +50,7 @@ class Accounts extends PureComponent {
             />
 
             <AccountCard
-              title={"ZRX"}
+              symbol={"ZRX"}
               balance={localAccount.zrxBalance}
               withAllowance={true}
               allowance={localAccount.zrxAllowance}
@@ -62,6 +62,7 @@ class Accounts extends PureComponent {
 
             <AccountCard
               title={"Node's ETH"}
+              symbol={"ETH"}
               balance={remoteAccount.ethBalance}
               withAllowance={false}
             />

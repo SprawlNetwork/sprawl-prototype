@@ -1,8 +1,14 @@
 import ReconnectingWebsocket from "reconnecting-websocket";
 
-import { decode, NEW_PEER, PEER_REMOVED } from "../common/messages";
+import {
+  decode,
+  NEW_PEER,
+  ORDER_UPDATED,
+  PEER_REMOVED
+} from "../common/messages";
 import { notificationReceived } from "./actions/notifications";
 import { nodeAddress } from "./selectors";
+import { ordersUpdated, ordersUpdateRequest } from "./actions";
 
 export default class WebsocketUpdater {
   constructor(store) {
@@ -37,21 +43,28 @@ export default class WebsocketUpdater {
       if (messageEvent.currentTarget.url === this.getWsUrl()) {
         const msg = decode(messageEvent.data);
 
-        const id = new Date().getTime();
+        console.log("Websocket message received", msg);
 
+        const id = new Date().getTime();
         switch (msg.type) {
           case NEW_PEER:
+            this.store.dispatch(ordersUpdateRequest(this.currentNodeAddress));
             return this.store.dispatch(
               notificationReceived(id, "Connected to node " + msg.peer)
             );
 
           case PEER_REMOVED:
+            this.store.dispatch(ordersUpdateRequest(this.currentNodeAddress));
             return this.store.dispatch(
               notificationReceived(id, "Disconnected from " + msg.peer)
             );
-        }
 
-        console.log("Websocket message received", msg);
+          case ORDER_UPDATED:
+            return this.store.dispatch(ordersUpdated([msg.order], []));
+
+          default:
+            console.warn("Unrecognized message type", msg.type);
+        }
       }
     };
 

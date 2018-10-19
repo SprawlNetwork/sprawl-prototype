@@ -4,6 +4,7 @@ import {
   remoteAccountAddressChanged,
   remoteAccountBalanceUpdateRequest
 } from "./remoteAccount";
+import { ordersUpdateRequest } from "./orders";
 
 export const NODE_ADDRESS_CHANGED = "NODE_ADDRESS_CHANGED";
 
@@ -60,6 +61,7 @@ export const connectionToNodeRequested = nodeAddress => async dispatch => {
 
   dispatch(remoteNetworkIdChanged(response.networkId));
   dispatch(remoteAccountAddressChanged(response.address));
+  dispatch(ordersUpdateRequest(nodeAddress));
   dispatch(connectionToNodeSuccess());
 
   return dispatch(remoteAccountBalanceUpdateRequest());

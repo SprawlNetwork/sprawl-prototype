@@ -2,6 +2,10 @@ import * as _ from "lodash";
 import { BigNumber } from "@0xproject/utils";
 
 import { call } from "../rpc";
+import { ethHelper } from "../eth";
+import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
+
+const SIGNATURE_CANCELLED_BY_USER = -32603;
 
 export const ORDERS_UPDATED = "ORDERS_UPDATED";
 
@@ -59,32 +63,55 @@ export const makeOrderRequest = (wethAmount, zrxAmount, isBuy) => async (
   dispatch,
   getState
 ) => {
-  const now = new Date();
+  const {
+    localAccount: { address: localAddress },
+    remoteAccount: { address: senderAddress }
+  } = getState();
+
+  const ONE = new BigNumber(1e18);
+
+  let signedOrder;
+  let sprawlOrder;
+  try {
+    signedOrder = await ethHelper.createAndSignOrder(
+      localAddress,
+      senderAddress,
+      ONE.mul(wethAmount),
+      ONE.mul(zrxAmount),
+      isBuy
+    );
+
+    sprawlOrder = await getSprawlOrderFrom0xSignedOrder(signedOrder, ethHelper);
+  } catch (error) {
+    if (error.code === SIGNATURE_CANCELLED_BY_USER) {
+      return;
+    }
+
+    console.error("Error making order", error);
+    return dispatch(makeOrderFailure(error));
+  }
 
   const {
-    nodeConnection: { address: nodeAddress },
-    localAccount: { address: localAddress }
+    nodeConnection: { address: nodeAddress }
   } = getState();
 
   let order;
 
   try {
-    order = await call(nodeAddress, "sendOrder", {
-      id: localAddress + _.random(0, 123123),
-      weth: wethAmount,
-      zrx: zrxAmount,
-      buysZrx: isBuy,
-      maker: localAddress,
-      creationDate: now,
-      expirationDate: datefns.addDays(now, 1)
-    });
+    order = await call(nodeAddress, "sendOrder", sprawlOrder);
   } catch (error) {
-    console.error("Error making order", error);
     return dispatch(makeOrderFailure(error));
   }
 
   return dispatch(makeOrderSuccess(order));
 };
+
+export const TAKE_ORDER_STARTED = "TAKE_ORDER_STARTED";
+
+export const takeOrderStarted = order => ({
+  type: TAKE_ORDER_STARTED,
+  order
+});
 
 export const TAKE_ORDER_SUCCESS = "TAKE_ORDER_SUCCESS";
 
@@ -93,19 +120,51 @@ export const takeOrderSuccess = order => ({
   order
 });
 
+export const TAKE_ORDER_ERROR = "TAKE_ORDER_ERROR";
+
+export const takeOrderError = error => ({
+  type: TAKE_ORDER_ERROR,
+  error
+});
+
 export const takeOrderRequest = order => async (dispatch, getState) => {
   const {
-    nodeConnection: { address: nodeAddress },
     localAccount: { address: taker }
   } = getState();
 
+  let signedTakeOrderTransaction;
+  try {
+    signedTakeOrderTransaction = await ethHelper.signTakeOrderTransaction(
+      taker,
+      order.signedOrder
+    );
+  } catch (error) {
+    if (error.code === SIGNATURE_CANCELLED_BY_USER) {
+      console.log("Take order cancelled");
+    } else {
+      console.log("Error signing take order tx", error);
+    }
+
+    return;
+  }
+
+  const {
+    nodeConnection: { address: nodeAddress }
+  } = getState();
+
+  dispatch(takeOrderStarted(order));
+
   let takenOrder;
   try {
-    takenOrder = await call(nodeAddress, "takeOrder", { ...order, taker });
+    takenOrder = await call(
+      nodeAddress,
+      "takeOrder",
+      order.id,
+      signedTakeOrderTransaction
+    );
   } catch (error) {
     console.error("Failed to take order", error);
-    // TODO: Handle order taking errors.
-    return;
+    return dispatch(takeOrderError(error));
   }
 
   return dispatch(takeOrderSuccess(takenOrder));

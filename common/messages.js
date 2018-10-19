@@ -15,3 +15,10 @@ export const peerRemoved = peerId => ({
   type: PEER_REMOVED,
   peer: peerId
 });
+
+export const ORDER_UPDATED = "ORDER_UPDATED";
+
+export const orderUpdated = order => ({
+  type: ORDER_UPDATED,
+  order
+});

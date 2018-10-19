@@ -29,7 +29,10 @@ import AllowanceError from "../components/AllowanceError";
 
 class App extends Component {
   onConnect = nodeAddress => {
-    if (this.props.nodeAddress !== nodeAddress || this.props.remoteAccount) {
+    if (
+      this.props.nodeAddress !== nodeAddress ||
+      this.props.couldNotConnectToNode
+    ) {
       this.props.dispatch(nodeAddressChanged(nodeAddress));
       this.props.dispatch(connectionToNodeRequested(nodeAddress));
     }
@@ -55,15 +58,16 @@ class App extends Component {
       hasZrxAllowanceError
     } = this.props;
 
+    if (metaMaskInWrongNetwork) {
+      return <ChangeMetaMaskNetwork remoteNetworkId={remoteNetworkId} />;
+    }
+
+    if (!metaMaskUnlocked) {
+      return <UnlockMetaMaskMessage />;
+    }
+
     return (
       <>
-        {!metaMaskUnlocked && <UnlockMetaMaskMessage />}
-
-        {metaMaskUnlocked &&
-          metaMaskInWrongNetwork && (
-            <ChangeMetaMaskNetwork remoteNetworkId={remoteNetworkId} />
-          )}
-
         <div>
           <div className="container">
             <h1>Sprawl</h1>
@@ -106,7 +110,6 @@ class App extends Component {
 
 const mapStateToProps = state => ({
   nodeAddress: state.nodeConnection.address,
-  remoteAccount: state.remote,
   metaMaskUnlocked: metaMaskUnlocked(state),
   metaMaskInWrongNetwork: metaMaskInWrongNetwork(state),
   couldNotConnectToNode: couldNotConnectToNode(state),
