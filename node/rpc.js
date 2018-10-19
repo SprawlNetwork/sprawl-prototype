@@ -56,6 +56,10 @@ export class RPCServer {
             return;
           }
 
+          if (methodName === "getOrders") {
+            return;
+          }
+
           const methodExists =
             Object.getOwnPropertyNames(methodsObject.__proto__).includes(
               methodName
