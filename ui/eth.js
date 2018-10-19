@@ -8,7 +8,11 @@ export let ethHelper;
 
 // This is so wrong
 window.addEventListener("load", () => {
+  const injectedProvider = window.ethereum
+    ? window.ethereum
+    : window.web3.currentProvider;
+
   ethHelper = new EthHelper(
-    new ethers.providers.Web3Provider(window.web3.currentProvider)
+    new ethers.providers.Web3Provider(injectedProvider)
   );
 });
