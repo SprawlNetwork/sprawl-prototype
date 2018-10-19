@@ -1,5 +1,3 @@
-import { BigNumber } from "@0xproject/utils";
-
 const EventEmitter = require("events");
 const { RPCClient } = require("./rpc");
 const net = require("net");
@@ -11,9 +9,10 @@ const KEEP_ALIVE_INTERVAL = 2000;
 const MAX_PING_ERRORS = 5;
 
 export class Peer {
-  constructor(localPeerName, ip, port) {
+  constructor(localPeerName, ip, port, peerAddress) {
     this.ip = ip;
     this.port = port;
+    this.address = peerAddress;
     this._rpcClient = new RPCClient(localPeerName, ip, port);
   }
 
@@ -27,8 +26,9 @@ export class Peer {
 }
 
 export class PeerManager extends EventEmitter {
-  constructor() {
+  constructor(wallet) {
     super();
+    this._wallet = wallet;
     this._peers = [];
     this._peersErrorCount = new WeakMap();
   }
@@ -71,7 +71,9 @@ export class PeerManager extends EventEmitter {
   }
 
   _getPeerName() {
-    return "Sprawl:" + network.getFirstLocalIp() + ":" + this._localPort;
+    return (
+      "Sprawl-" + this._wallet.address.toLowerCase() + "-" + this._localPort
+    );
   }
 
   _getPeerBonjourType() {
@@ -127,8 +129,9 @@ export class PeerManager extends EventEmitter {
   _bonjourServiceToPeer(service) {
     const ip = service.addresses.filter(addr => net.isIPv4(addr))[0];
     const port = service.port;
+    const address = service.name.split("-")[1].toLowerCase();
 
-    return new Peer(this._getPeerName(), ip, port);
+    return new Peer(this._getPeerName(), ip, port, address);
   }
 
   _startKeepAlive() {
