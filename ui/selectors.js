@@ -10,7 +10,8 @@ export const metaMaskUnlocked = state =>
   state.localAccount.address !== undefined;
 
 export const metaMaskInWrongNetwork = state =>
-  state.networks.remote.networkId !== undefined &&
+  state.networks.remote.networkId &&
+  state.networks.local.networkId &&
   state.networks.local.networkId !== state.networks.remote.networkId;
 
 export const couldNotConnectToNode = state =>
