@@ -1,3 +1,5 @@
+import { updateLocalAccountAddressIfNecessary } from "./localAccount";
+
 export const updateLocalNetworkIdIfNecessary = () => async (
   dispatch,
   getState
@@ -15,6 +17,7 @@ export const updateLocalNetworkIdIfNecessary = () => async (
     return null;
   }
 
+  dispatch(updateLocalAccountAddressIfNecessary());
   return dispatch(localNetworkIdChanged(updated));
 };
 
