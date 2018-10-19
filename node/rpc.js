@@ -39,7 +39,7 @@ export class RPCServer {
 
     const app = connect();
     app.use(errorhandler());
-    app.use(jsonParser());
+    app.use(jsonParser({ reviver: unserialize }));
     app.use(
       morgan(
         function(tokens, req, res) {
