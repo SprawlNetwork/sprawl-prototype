@@ -32,7 +32,8 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
-      title: "Sprawl"
+      title: "Sprawl",
+      template: "./index.ejs"
     }),
     new HtmlWebpackRootPlugin()
   ],
