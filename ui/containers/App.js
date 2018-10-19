@@ -17,6 +17,7 @@ import {
 import Notifications from "./Notifications";
 import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
 import {
+  connectedToNode,
   couldNotConnectToNode,
   hasWethAllowanceError,
   hasZrxAllowanceError,
@@ -29,10 +30,7 @@ import AllowanceError from "../components/AllowanceError";
 
 class App extends Component {
   onConnect = nodeAddress => {
-    if (
-      this.props.nodeAddress !== nodeAddress ||
-      this.props.couldNotConnectToNode
-    ) {
+    if (this.props.nodeAddress !== nodeAddress || !this.props.connectedToNode) {
       this.props.dispatch(nodeAddressChanged(nodeAddress));
       this.props.dispatch(connectionToNodeRequested(nodeAddress));
     }
@@ -112,6 +110,7 @@ const mapStateToProps = state => ({
   nodeAddress: state.nodeConnection.address,
   metaMaskUnlocked: metaMaskUnlocked(state),
   metaMaskInWrongNetwork: metaMaskInWrongNetwork(state),
+  connectedToNode: connectedToNode(state),
   couldNotConnectToNode: couldNotConnectToNode(state),
   lostConnectionToNode: lostConnectionToNode(state),
   remoteNetworkId: state.networks.remote.networkId,

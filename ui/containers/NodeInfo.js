@@ -1,10 +1,22 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
+import { connectedToNode, nodeAddress } from "../selectors";
 
 class NodeInfo extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = { newAddress: props.nodeAddress };
+  }
+
   onSubmit = e => {
     e.preventDefault();
-    this.props.onConnect(this.addressInput.value);
+    this.props.onConnect(this.state.newAddress);
+  };
+
+  onInputChanged = e => {
+    const newValue =
+      e.target.value !== "" ? e.target.value : this.props.nodeAddress;
+    this.setState({ newAddress: newValue });
   };
 
   render() {
@@ -22,10 +34,18 @@ class NodeInfo extends PureComponent {
             <input
               type="text"
               className="form-control mr-2"
-              defaultValue={this.props.nodeAddress}
-              ref={i => (this.addressInput = i)}
+              value={this.state.newAddress}
+              onChange={this.onInputChanged}
             />
-            <button className="btn btn-primary">Connect</button>
+            <button
+              disabled={
+                this.state.newAddress === this.props.nodeAddress &&
+                this.props.connectedToNode
+              }
+              className="btn btn-primary"
+            >
+              Connect
+            </button>
           </div>
         </form>
       </div>
@@ -35,7 +55,8 @@ class NodeInfo extends PureComponent {
 
 const mapStateToProps = (state, { onConnect }) => ({
   onConnect,
-  nodeAddress: state.nodeConnection.address
+  nodeAddress: nodeAddress(state),
+  connectedToNode: connectedToNode(state)
 });
 
 export default connect(mapStateToProps)(NodeInfo);

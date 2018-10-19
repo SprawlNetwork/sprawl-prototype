@@ -14,6 +14,8 @@ export const metaMaskInWrongNetwork = state =>
   state.networks.local.networkId &&
   state.networks.local.networkId !== state.networks.remote.networkId;
 
+export const connectedToNode = state => state.nodeConnection.connected;
+
 export const couldNotConnectToNode = state =>
   !state.nodeConnection.connected && state.nodeConnection.error;
 
