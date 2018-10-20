@@ -29,12 +29,12 @@ a:hover {
 }
 
 .notification-enter {
-  margin-top: 100%;
+  opacity: 0.1;
 }
 
 .notification-enter.notification-enter-active {
-  margin-top: 1rem;
-  transition: margin-top 500ms linear;
+  opacity: 1;
+  transition: opacity 300ms ease-in;
 }
 
 .notification-leave {
