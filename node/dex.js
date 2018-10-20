@@ -169,13 +169,11 @@ fillingTx: ${order.fillingTx}
   _onNewPeer(peer) {
     this._onlineNodeAddresses.add(peer.address);
 
-    try {
-      this._addPeerOrders(peer).finally(() => {
+    this._addPeerOrders(peer)
+      .catch(error => console.error("Error adding new peer", error))
+      .then(() => {
         this._broadcastToClients(newPeer(`${peer.ip}:${peer.port}`));
       });
-    } catch (error) {
-      console.error("Error adding new peer", error);
-    }
   }
 
   _onPeerRemoved(peer) {
