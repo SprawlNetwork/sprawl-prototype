@@ -103,6 +103,8 @@ export default class Dex {
     if (this._isOwnOrder(localOrder)) {
       this._takeOwnOrder(localOrder, signedTakeOrderTransaction);
     }
+
+    return order;
   }
 
   async orderTakeStatusUpdate(order) {

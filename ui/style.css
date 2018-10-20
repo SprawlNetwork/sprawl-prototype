@@ -67,11 +67,15 @@ a:hover {
   text-align: center;
 }
 
-.orders td, .orders th {
+.orders td,
+.orders th {
   vertical-align: middle;
 }
 
 .order-date {
   font-size: 0.85em;
+}
 
+.order-actions-column {
+  width: 10em;
 }

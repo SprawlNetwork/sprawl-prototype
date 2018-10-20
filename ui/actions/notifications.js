@@ -1,13 +1,9 @@
-import _ from "lodash";
+export const NOTIFICATION_RECEIVED = "NOTIFICATION_RECEIVED";
 
-export const notificationReceived = (
-  id = _.random(1, 1000),
+export const notificationReceived = msg => ({
+  type: NOTIFICATION_RECEIVED,
   msg
-) => dispatch => {
-  dispatch(notificationAdded(id, msg));
-
-  setTimeout(() => dispatch(notificationExpired(id)), 10000);
-};
+});
 
 export const NOTIFICATION_ADDED = "NOTIFICATION_ADDED";
 

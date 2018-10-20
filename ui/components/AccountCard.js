@@ -4,7 +4,13 @@ import { allowanceIsBigEnough } from "../selectors";
 
 export default class AccountCard extends PureComponent {
   render() {
-    const { symbol, balance, withAllowance } = this.props;
+    const {
+      symbol,
+      balance,
+      withAllowance,
+      allowance,
+      waitingAllowance
+    } = this.props;
     const title = this.props.title || symbol;
 
     return (
@@ -20,9 +26,23 @@ export default class AccountCard extends PureComponent {
             )}
           </div>
           {withAllowance && (
-            <div className="card-text">
-              <label>Allowance:</label> {this._renderAllowance()}
-            </div>
+            <>
+              <div className="card-text">
+                <label>Allowance:</label> {this._renderAllowance()}
+              </div>
+              {((allowance && !allowanceIsBigEnough(allowance)) ||
+                waitingAllowance) && (
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={this.onAllowanceClicked}
+                    disabled={waitingAllowance}
+                  >
+                    Give allowance
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -30,24 +50,17 @@ export default class AccountCard extends PureComponent {
   }
 
   _renderAllowance() {
-    const { allowance } = this.props;
-    if (this.props.allowance === undefined) {
+    const { allowance, waitingAllowance } = this.props;
+    if (allowance === undefined) {
       return "...";
     }
 
-    if (this.props.waitingAllowance) {
-      return "Waiting for confirmation";
+    if (waitingAllowance) {
+      return "Setting...";
     }
 
     if (!allowanceIsBigEnough(allowance)) {
-      return (
-        <button
-          className="btn btn-secondary btn-sm"
-          onClick={this.onAllowanceClicked}
-        >
-          Give allowance
-        </button>
-      );
+      return "❌";
     }
 
     return "✅";

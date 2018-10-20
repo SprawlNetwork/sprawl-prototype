@@ -5,13 +5,17 @@ export const nodeAddress = state => state.nodeConnection.address;
 
 export const localAccountAddress = state => state.localAccount.address;
 
-export const remoteAccountAddress = state => state.localAccount.address;
+export const remoteAccountAddress = state => state.remoteAccount.address;
+
+export const remoteAccountBalance = state => state.remoteAccount.ethBalance;
 
 export const isLocalNetwork = state =>
   state.networks.remote.networkId === LOCAL_NETWORK_ID;
 
 export const metaMaskUnlocked = state =>
   state.localAccount.address !== undefined;
+
+export const localNetworkId = state => state.networks.local.networkId;
 
 export const remoteNetworkId = state => state.networks.remote.networkId;
 

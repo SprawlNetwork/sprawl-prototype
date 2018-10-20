@@ -6,76 +6,52 @@ import {
   ORDER_UPDATED,
   PEER_REMOVED
 } from "../common/messages";
-import { notificationReceived } from "./actions/notifications";
-import { nodeAddress } from "./selectors";
-import { ordersUpdated, ordersUpdateRequest } from "./actions";
+import { newPeer, ordersUpdated, peerRemoved } from "./actions";
 
 export default class WebsocketUpdater {
-  constructor(store) {
-    this.store = store;
-    this.setupNewNode();
+  constructor(actionsDispatcher) {
+    this._actionsDispatcher = actionsDispatcher;
   }
 
-  setupNewNode() {
-    this.currentNodeAddress = nodeAddress(this.store.getState());
-    this.connectWebsockets();
-  }
+  start(nodeAddress) {
+    this._wsUrl = "ws://" + nodeAddress + "/";
 
-  start() {
-    this.store.subscribe(this.onStateChanged.bind(this));
-  }
+    this._ws = new ReconnectingWebsocket(this._wsUrl);
 
-  onStateChanged() {
-    if (nodeAddress(this.store.getState()) !== this.currentNodeAddress) {
-      this.setupNewNode();
-    }
-  }
-
-  connectWebsockets() {
-    if (this.ws !== undefined) {
-      this.ws.close();
-      this.ws = undefined;
-    }
-
-    this.ws = new ReconnectingWebsocket(this.getWsUrl());
-
-    this.ws.onmessage = messageEvent => {
-      if (messageEvent.currentTarget.url === this.getWsUrl()) {
-        const msg = decode(messageEvent.data);
-
-        console.log("Websocket message received", msg);
-
-        const id = new Date().getTime();
-        switch (msg.type) {
-          case NEW_PEER:
-            this.store.dispatch(ordersUpdateRequest(this.currentNodeAddress));
-            return this.store.dispatch(
-              notificationReceived(id, "Connected to node " + msg.peer)
-            );
-
-          case PEER_REMOVED:
-            this.store.dispatch(ordersUpdateRequest(this.currentNodeAddress));
-            return this.store.dispatch(
-              notificationReceived(id, "Disconnected from " + msg.peer)
-            );
-
-          case ORDER_UPDATED:
-            return this.store.dispatch(ordersUpdated([msg.order], []));
-
-          default:
-            console.warn("Unrecognized message type", msg.type);
-        }
-      }
+    this._ws.onerror = errorEvent => {
+      console.warn("WebSocket error", errorEvent);
     };
 
-    this.ws.onerror = errorEvent => {
-      if (errorEvent.currentTarget.url === this.getWsUrl()) {
-        console.warn("WebSocket error", errorEvent);
-      }
+    this._ws.onmessage = messageEvent => {
+      this._onMessage(decode(messageEvent.data));
     };
   }
 
-  getWsUrl() {
-    return "ws://" + this.currentNodeAddress + "/";
+  stop() {
+    if (this._ws) {
+      this._ws.close();
+    }
+  }
+
+  _dispatch(action) {
+    this._actionsDispatcher(action);
+  }
+
+  _onMessage(msg) {
+    console.log("Websocket message received", msg);
+
+    switch (msg.type) {
+      case NEW_PEER:
+        return this._dispatch(newPeer(msg.peer));
+
+      case PEER_REMOVED:
+        return this._dispatch(peerRemoved(msg.peer));
+
+      case ORDER_UPDATED:
+        return this._dispatch(ordersUpdated([msg.order], []));
+
+      default:
+        console.warn("Unrecognized message type", msg.type);
+    }
   }
 }

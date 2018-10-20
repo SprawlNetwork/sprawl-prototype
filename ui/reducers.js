@@ -1,6 +1,10 @@
 import { combineReducers } from "redux";
 import * as _ from "lodash";
 
+import { BigNumber } from "@0xproject/utils";
+
+const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
+
 import {
   CONNECTION_ERROR_CHANGED,
   LOCAL_ACCOUNT_ADDRESS_CHANGED,
@@ -68,7 +72,11 @@ function localAccount(
       return { ...state, wethAllowanceWaiting: true };
 
     case WETH_ALLOWANCE_SETTING_SUCCESS:
-      return { ...state, wethAllowanceWaiting: false };
+      return {
+        ...state,
+        wethAllowanceWaiting: false,
+        wethAllowance: UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+      };
 
     case WETH_ALLOWANCE_SETTING_ERROR:
       return {
@@ -84,7 +92,11 @@ function localAccount(
       return { ...state, zrxAllowanceWaiting: true };
 
     case ZRX_ALLOWANCE_SETTING_SUCCESS:
-      return { ...state, zrxAllowanceWaiting: false };
+      return {
+        ...state,
+        zrxAllowanceWaiting: false,
+        zrxAllowance: UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+      };
 
     case ZRX_ALLOWANCE_SETTING_ERROR:
       return {

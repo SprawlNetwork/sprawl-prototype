@@ -5,38 +5,45 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import configureStore from "./configureStore";
-import { initBackgroundJobs } from "./background";
 import createSagaMiddleware from "redux-saga";
-import { initEthHelper } from "./eth";
 import { rootSaga } from "./sagas";
 
 import App from "./containers/App";
-import { metamaskLoaded, nodeAddressChanged } from "./actions";
-import WebsocketUpdater from "./WebsocketUpdater";
-
-const defaultNodeAddress = window.location.search
-  ? window.location.search.substr(1)
-  : "127.0.0.1:1337";
+import {
+  localNetworkIdChanged,
+  metamaskLoaded,
+  nodeAddressChanged
+} from "./actions";
+import { EthHelper } from "../common/eth";
+import * as ethers from "ethers";
 
 const sagaMiddleware = createSagaMiddleware();
 
 const store = configureStore(sagaMiddleware);
 
-window.addEventListener("load", () => {
-  // This is fine ☕️🔥
-  const ethHelper = initEthHelper();
-
-  sagaMiddleware.run(rootSaga, ethHelper);
-
-  store.dispatch(metamaskLoaded());
-
-  initBackgroundJobs(store);
-
-  const backgroundUpdater = new WebsocketUpdater(store);
-  backgroundUpdater.start();
-});
+const defaultNodeAddress = window.location.search
+  ? window.location.search.substr(1)
+  : "127.0.0.1:1337";
 
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
+
+window.addEventListener("load", () => {
+  store.dispatch(metamaskLoaded());
+
+  const injectedProvider = window.ethereum
+    ? window.ethereum
+    : window.web3.currentProvider;
+
+  const ethHelper = new EthHelper(
+    new ethers.providers.Web3Provider(injectedProvider)
+  );
+
+  ethHelper
+    .getNetworkId()
+    .then(id => store.dispatch(localNetworkIdChanged(id)));
+
+  sagaMiddleware.run(rootSaga, ethHelper, store.dispatch.bind(store));
+});
 
 ReactDOM.render(
   <Provider store={store}>

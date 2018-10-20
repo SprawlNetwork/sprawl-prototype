@@ -136,7 +136,7 @@ export class EthHelper {
   }
 
   async isLocalNetwork() {
-    return (await this._getNetworkId()) === LOCAL_NETWORK_ID;
+    return (await this.getNetworkId()) === LOCAL_NETWORK_ID;
   }
 
   async createAndSignOrder(
@@ -300,7 +300,7 @@ export class EthHelper {
     return this._0xProvider;
   }
 
-  async _getNetworkId() {
+  async getNetworkId() {
     if (this._networkId === undefined) {
       const network = await this._ethersProvider.getNetwork();
       this._networkId = +network.chainId;
@@ -315,7 +315,7 @@ export class EthHelper {
   async _getContractsWrapper() {
     if (this._contractsWrapper === undefined) {
       this._contractsWrapper = new ContractWrappers(this._get0xProvider(), {
-        networkId: await this._getNetworkId()
+        networkId: await this.getNetworkId()
       });
     }
 

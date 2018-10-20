@@ -108,10 +108,13 @@ class MakeOrder extends PureComponent {
 }
 
 const mapStateToProps = (
-  { localAccount, connectionError, makeOrderError },
+  { localAccount, nodeConnection, makeOrderError },
   { onSubmit }
 ) => ({
-  disabled: localAccount.address === undefined || connectionError,
+  disabled:
+    localAccount.address === undefined ||
+    nodeConnection.error ||
+    !nodeConnection.connected,
   error: makeOrderError,
   onSubmit
 });

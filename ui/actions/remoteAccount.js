@@ -1,5 +1,3 @@
-import { ethHelper } from "../eth";
-
 export const REMOTE_ACCOUNT_ADDRESS_CHANGED = "REMOTE_ACCOUNT_ADDRESS_CHANGED";
 
 export const remoteAccountAddressChanged = address => ({
@@ -13,22 +11,3 @@ export const remoteAccountBalanceUpdated = ethBalance => ({
   type: REMOTE_ACCOUNT_BALANCE_UPDATED,
   ethBalance
 });
-
-export const remoteAccountBalanceUpdateRequest = () => async (
-  dispatch,
-  getState
-) => {
-  const {
-    remoteAccount: { address }
-  } = getState();
-
-  const newBalance = await ethHelper.getEthBalance(address);
-
-  const {
-    remoteAccount: { ethBalance }
-  } = getState();
-
-  if (ethBalance === undefined || !newBalance.eq(ethBalance)) {
-    return dispatch(remoteAccountBalanceUpdated(newBalance));
-  }
-};
