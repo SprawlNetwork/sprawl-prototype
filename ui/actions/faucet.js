@@ -1,9 +1,15 @@
-import { call } from "../rpc";
+import { callNode } from "../rpc";
 import { notificationReceived } from "./notifications";
 import {
   localAccountEthBalanceUpdateRequest,
   localAccountWethBalanceUpdateRequest
 } from "./localAccount";
+
+export const FAUCET_CALL_REQUESTED = "FAUCET_CALL_REQUESTED";
+
+export const faucetCallRequested = () => ({
+  type: FAUCET_CALL_REQUESTED
+});
 
 export const callFaucet = () => async (dispatch, getState) => {
   const {
@@ -12,7 +18,7 @@ export const callFaucet = () => async (dispatch, getState) => {
   } = getState();
 
   try {
-    await call(nodeAddress, "faucet", address);
+    await callNode(nodeAddress, "faucet", address);
   } catch (e) {
     console.error("Error calling faucet", e);
     return dispatch(notificationReceived(undefined, "Error calling faucet"));

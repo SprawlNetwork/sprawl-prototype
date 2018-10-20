@@ -1,4 +1,4 @@
-import { call } from "../rpc";
+import { callNode } from "../rpc";
 import { remoteNetworkIdChanged } from "./networks";
 import {
   remoteAccountAddressChanged,
@@ -25,7 +25,7 @@ function connectionErrorChanged(connectionError) {
 }
 
 export const checkConnectionState = address => (dispatch, getState) => {
-  call(address, "ping")
+  callNode(address, "ping")
     .then(() => false)
     .catch(() => true)
     .then(connectionError => {
@@ -53,7 +53,7 @@ export const connectionToNodeRequested = nodeAddress => async dispatch => {
   dispatch(connectionToNodeStarted());
 
   try {
-    response = await call(nodeAddress, "getNodeInfo");
+    response = await callNode(nodeAddress, "getNodeInfo");
   } catch (e) {
     console.error(`Error connecting to node ${nodeAddress}`, e);
     return dispatch(connectionErrorChanged(true));

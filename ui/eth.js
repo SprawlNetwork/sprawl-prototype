@@ -4,10 +4,9 @@ import * as ethers from "ethers";
 /**
  * @type EthHelper
  */
-export let ethHelper;
+export let ethHelper = undefined;
 
-// This is so wrong
-window.addEventListener("load", () => {
+export function initEthHelper() {
   const injectedProvider = window.ethereum
     ? window.ethereum
     : window.web3.currentProvider;
@@ -15,4 +14,6 @@ window.addEventListener("load", () => {
   ethHelper = new EthHelper(
     new ethers.providers.Web3Provider(injectedProvider)
   );
-});
+
+  return ethHelper;
+}

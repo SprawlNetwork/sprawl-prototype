@@ -3,11 +3,17 @@ import { BigNumber } from "@0xproject/utils";
 
 export const nodeAddress = state => state.nodeConnection.address;
 
+export const localAccountAddress = state => state.localAccount.address;
+
+export const remoteAccountAddress = state => state.localAccount.address;
+
 export const isLocalNetwork = state =>
   state.networks.remote.networkId === LOCAL_NETWORK_ID;
 
 export const metaMaskUnlocked = state =>
   state.localAccount.address !== undefined;
+
+export const remoteNetworkId = state => state.networks.remote.networkId;
 
 export const metaMaskInWrongNetwork = state =>
   state.networks.remote.networkId &&
@@ -35,3 +41,5 @@ export const hasWethAllowanceError = state =>
 
 export const hasZrxAllowanceError = state =>
   !!state.localAccount.zrxAllowanceError;
+
+export const isMetaMaskLoading = state => state.metamask.loading;

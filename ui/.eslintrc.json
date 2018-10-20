@@ -2,8 +2,8 @@
   "env": {
     "browser": true
   },
-  "plugins": ["react"],
-  "extends": ["plugin:react/recommended"],
+  "plugins": ["react", "redux-saga"],
+  "extends": ["plugin:react/recommended", "plugin:redux-saga/recommended"],
   "rules": {
     "react/prop-types": "off"
   },

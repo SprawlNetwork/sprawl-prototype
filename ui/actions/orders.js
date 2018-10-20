@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import { BigNumber } from "@0xproject/utils";
 
-import { call } from "../rpc";
+import { callNode } from "../rpc";
 import { ethHelper } from "../eth";
 import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
 
@@ -19,7 +19,7 @@ export const ordersUpdateRequest = nodeAddress => async (
   dispatch,
   getState
 ) => {
-  const remoteOrders = await call(nodeAddress, "getOrders");
+  const remoteOrders = await callNode(nodeAddress, "getOrders");
   const currentOrders = getState().orders;
 
   const remoteOrderIds = remoteOrders.map(o => o.id);
@@ -98,7 +98,7 @@ export const makeOrderRequest = (wethAmount, zrxAmount, isBuy) => async (
   let order;
 
   try {
-    order = await call(nodeAddress, "sendOrder", sprawlOrder);
+    order = await callNode(nodeAddress, "sendOrder", sprawlOrder);
   } catch (error) {
     return dispatch(makeOrderFailure(error));
   }
@@ -156,7 +156,7 @@ export const takeOrderRequest = order => async (dispatch, getState) => {
 
   let takenOrder;
   try {
-    takenOrder = await call(
+    takenOrder = await callNode(
       nodeAddress,
       "takeOrder",
       order.id,

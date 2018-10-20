@@ -1,4 +1,4 @@
-import { callFaucet } from "../actions/faucet";
+import { faucetCallRequested } from "../actions/faucet";
 import React from "react";
 import { connect } from "react-redux";
 import { isLocalNetwork } from "../selectors";
@@ -12,7 +12,7 @@ function Faucet({ isLocalNetwork, dispatch }) {
     <div>
       <button
         className="btn-primary btn-sm"
-        onClick={() => dispatch(callFaucet())}
+        onClick={() => dispatch(faucetCallRequested())}
       >
         Load address from faucet
       </button>

@@ -5,7 +5,6 @@ import MakeOrder from "./MakeOrder";
 import NodeInfo from "./NodeInfo";
 import Accounts from "./Accounts";
 import Orders from "./Orders";
-import { connect } from "react-redux";
 import {
   makeOrderRequest,
   nodeAddressChanged,
@@ -21,12 +20,17 @@ import {
   couldNotConnectToNode,
   hasWethAllowanceError,
   hasZrxAllowanceError,
+  isMetaMaskLoading,
   lostConnectionToNode,
   metaMaskInWrongNetwork,
-  metaMaskUnlocked
+  metaMaskUnlocked,
+  nodeAddress,
+  remoteNetworkId
 } from "../selectors";
 import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
 import AllowanceError from "../components/AllowanceError";
+import LoadingMessage from "../components/LoadingMessage";
+import { connectSelectors } from "../redux";
 
 class App extends Component {
   onConnect = nodeAddress => {
@@ -53,8 +57,13 @@ class App extends Component {
       metaMaskInWrongNetwork,
       remoteNetworkId,
       hasWethAllowanceError,
-      hasZrxAllowanceError
+      hasZrxAllowanceError,
+      isMetaMaskLoading
     } = this.props;
+
+    if (isMetaMaskLoading) {
+      return <LoadingMessage />;
+    }
 
     if (metaMaskInWrongNetwork) {
       return <ChangeMetaMaskNetwork remoteNetworkId={remoteNetworkId} />;
@@ -106,16 +115,15 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = state => ({
-  nodeAddress: state.nodeConnection.address,
-  metaMaskUnlocked: metaMaskUnlocked(state),
-  metaMaskInWrongNetwork: metaMaskInWrongNetwork(state),
-  connectedToNode: connectedToNode(state),
-  couldNotConnectToNode: couldNotConnectToNode(state),
-  lostConnectionToNode: lostConnectionToNode(state),
-  remoteNetworkId: state.networks.remote.networkId,
-  hasWethAllowanceError: hasWethAllowanceError(state),
-  hasZrxAllowanceError: hasZrxAllowanceError(state)
-});
-
-export default connect(mapStateToProps)(App);
+export default connectSelectors({
+  nodeAddress,
+  metaMaskUnlocked,
+  metaMaskInWrongNetwork,
+  connectedToNode,
+  couldNotConnectToNode,
+  lostConnectionToNode,
+  remoteNetworkId,
+  hasWethAllowanceError,
+  hasZrxAllowanceError,
+  isMetaMaskLoading
+})(App);

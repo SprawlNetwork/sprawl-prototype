@@ -31,7 +31,8 @@ import {
   WETH_ALLOWANCE_SETTING_ERROR,
   WETH_ALLOWANCE_SETTING_ERROR_DISMISS,
   ZRX_ALLOWANCE_SETTING_ERROR,
-  ZRX_ALLOWANCE_SETTING_ERROR_DISMISS
+  ZRX_ALLOWANCE_SETTING_ERROR_DISMISS,
+  METAMASK_LOADED
 } from "./actions";
 
 function localAccount(
@@ -223,6 +224,16 @@ function errors(
   }
 }
 
+function metamask(state = { loading: true }, action) {
+  switch (action.type) {
+    case METAMASK_LOADED:
+      return { ...state, loading: false };
+
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   nodeConnection,
   networks,
@@ -231,7 +242,8 @@ const rootReducer = combineReducers({
   orders,
   makeOrderError,
   notifications,
-  errors
+  errors,
+  metamask
 });
 
 export default rootReducer;

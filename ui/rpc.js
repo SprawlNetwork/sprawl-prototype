@@ -54,7 +54,7 @@ export class RPCClient {
   }
 }
 
-export async function call(nodeAddress, funcName, ...params) {
+export async function callNode(nodeAddress, funcName, ...params) {
   const client = new RPCClient(nodeAddress);
 
   return client.call(funcName, ...params);

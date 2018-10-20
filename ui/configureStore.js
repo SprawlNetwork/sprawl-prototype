@@ -5,11 +5,11 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import rootReducer from "./reducers";
 import { createLogger } from "redux-logger";
 
-const configureStore = preloadedState => {
+const configureStore = (sagaMiddleware, preloadedState) => {
   return createStore(
     rootReducer,
     preloadedState,
-    composeWithDevTools(applyMiddleware(thunk, createLogger()))
+    composeWithDevTools(applyMiddleware(sagaMiddleware, thunk, createLogger()))
   );
 };
 
