@@ -34,7 +34,7 @@ function Orders(props) {
             <th scope="col">Buy</th>
             <th scope="col">Reception</th>
             <th scope="col">Expiration</th>
-            <th scope="col" className="order-actions-column"/>
+            <th scope="col" className="order-actions-column" />
           </tr>
         </thead>
         <tbody>
