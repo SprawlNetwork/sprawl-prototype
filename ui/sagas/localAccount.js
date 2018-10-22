@@ -26,7 +26,7 @@ import {
   zrxAllowanceSettingStarted,
   zrxAllowanceSettingSuccess
 } from "../actions";
-import { localAccountAddress } from "../selectors";
+import { localAccountAddress, metaMaskUnlocked } from "../selectors";
 import { makeOrderSaga, takeOrderSaga } from "./orders";
 
 function arEqual(current, updated) {
@@ -48,6 +48,16 @@ function* updateValue(
     try {
       const current = yield select(currentValueSelector);
       const updated = yield call(updatedValueGetter);
+
+      // Sometimes the message about unlocking metamask is always shown.
+      // This is here to help debug that, as it's not reproducible
+      if (title === "local account address") {
+        const metamaskUnlocked = yield select(metaMaskUnlocked);
+
+        if (!metamaskUnlocked) {
+          console.log("Metamask is locked", current, updated);
+        }
+      }
 
       if (!arEqual(current, updated)) {
         yield put(successActionCreator(updated));
