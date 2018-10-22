@@ -16,5 +16,3 @@ export function* rootSaga(ethHelper, dispatch) {
     console.error("Fatal error in root saga", error);
   }
 }
-
-

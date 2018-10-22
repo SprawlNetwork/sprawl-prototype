@@ -90,8 +90,6 @@ export function* takeOrderSaga(ethHelper, localAddress, { order }) {
 
     yield put(takeOrderStarted(order));
 
-    console.log("ACA");
-
     const node = yield select(nodeAddress);
     const takenOrder = yield call(
       callNode,

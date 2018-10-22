@@ -252,6 +252,7 @@ export class EthHelper {
 
   async takeOrder(senderAddress, signedTakeOrderTransaction) {
     const wrapper = await this._getContractsWrapper();
+
     return wrapper.exchange.executeTransactionAsync(
       signedTakeOrderTransaction.salt,
       signedTakeOrderTransaction.takerAddress,
@@ -269,7 +270,6 @@ export class EthHelper {
     const orderStatus = await wrapper.exchange.getOrderInfoAsync(signedOrder, {
       defaultBlock: "latest"
     });
-    console.log(orderStatus);
 
     return orderStatus.orderStatus === 5;
   }
