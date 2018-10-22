@@ -50,7 +50,7 @@ export function* makeOrderSaga(
   const ONE = new BigNumber(1e18);
 
   try {
-    const senderAddress = yield select(state => state.localAccount.address);
+    const senderAddress = yield select(state => state.remoteAccount.address);
 
     const signedOrder = yield call(() =>
       ethHelper.createAndSignOrder(
@@ -98,8 +98,6 @@ export function* takeOrderSaga(ethHelper, localAddress, { order }) {
       order.id,
       signedTakeOrderTransaction
     );
-
-    console.log(takenOrder);
 
     yield put(takeOrderSuccess(takenOrder));
   } catch (error) {
