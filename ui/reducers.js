@@ -24,89 +24,116 @@ import {
   NOTIFICATION_DISMISSED,
   NOTIFICATION_EXPIRED,
   NOTIFICATION_ADDED,
-  LOCAL_ACCOUNT_WETH_BALANCE_UPDATED,
-  LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED,
-  LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED,
-  LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED,
-  WETH_ALLOWANCE_SETTING_STARTED,
-  WETH_ALLOWANCE_SETTING_SUCCESS,
-  ZRX_ALLOWANCE_SETTING_STARTED,
-  ZRX_ALLOWANCE_SETTING_SUCCESS,
-  WETH_ALLOWANCE_SETTING_ERROR,
-  WETH_ALLOWANCE_SETTING_ERROR_DISMISS,
-  ZRX_ALLOWANCE_SETTING_ERROR,
-  ZRX_ALLOWANCE_SETTING_ERROR_DISMISS,
-  METAMASK_LOADED
+  METAMASK_LOADED,
+  TOKEN_ADDED,
+  TOKEN_BALANCE_UPDATED,
+  TOKEN_ALLOWANCE_UPDATED,
+  TOKEN_SET_ALLOWANCE_STARTED,
+  TOKEN_SET_ALLOWANCE_FAILED,
+  TOKEN_SET_ALLOWANCE_SUCCESS,
+  TOKEN_SET_ALLOWANCE_ERROR_DISMISS,
+  MAKE_ORDER_REQUEST
 } from "./actions";
+import { fromEntries } from "../common/utils";
+
+function tokens(state = {}, action) {
+  switch (action.type) {
+    case TOKEN_ADDED:
+      return {
+        ...state,
+        [action.token.address]: {
+          ...action.token,
+          balance: undefined,
+          allowance: undefined
+        }
+      };
+
+    case LOCAL_ACCOUNT_ADDRESS_CHANGED:
+      return fromEntries(
+        Object.values(state).map(t => [
+          t.address,
+          {
+            ...t,
+            balance: undefined,
+            allowance: undefined,
+            waitingForAllowance: undefined,
+            allowanceError: undefined
+          }
+        ])
+      );
+
+    case TOKEN_BALANCE_UPDATED:
+      console.log(action);
+      return {
+        ...state,
+        [action.address]: { ...state[action.address], balance: action.balance }
+      };
+
+    case TOKEN_ALLOWANCE_UPDATED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          allowance: action.allowance
+        }
+      };
+
+    case TOKEN_SET_ALLOWANCE_STARTED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForAllowance: true
+        }
+      };
+
+    case TOKEN_SET_ALLOWANCE_SUCCESS:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForAllowance: false,
+          allowance: UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+        }
+      };
+
+    case TOKEN_SET_ALLOWANCE_FAILED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForAllowance: false,
+          allowanceError: action.error
+        }
+      };
+
+    case TOKEN_SET_ALLOWANCE_ERROR_DISMISS:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          allowanceError: undefined
+        }
+      };
+
+    default:
+      return state;
+  }
+}
 
 function localAccount(
   state = {
     address: undefined,
-    ethBalance: undefined,
-    wethBalance: undefined,
-    zrxBalance: undefined,
-    wethAllowanceWaiting: false
+    ethBalance: undefined
   },
   action
 ) {
   switch (action.type) {
     case LOCAL_ACCOUNT_ADDRESS_CHANGED:
-      return { address: action.address };
+      return { address: action.address, tokens: tokens(state.tokens, action) };
 
     case LOCAL_ACCOUNT_ETH_BALANCE_UPDATED:
       return { ...state, ethBalance: action.ethBalance };
-
-    case LOCAL_ACCOUNT_WETH_BALANCE_UPDATED:
-      return { ...state, wethBalance: action.wethBalance };
-
-    case LOCAL_ACCOUNT_ZRX_BALANCE_UPDATED:
-      return { ...state, zrxBalance: action.zrxBalance };
-
-    case LOCAL_ACCOUNT_WETH_ALLOWANCE_UPDATED:
-      return { ...state, wethAllowance: action.wethAllowance };
-
-    case LOCAL_ACCOUNT_ZRX_ALLOWANCE_UPDATED:
-      return { ...state, zrxAllowance: action.zrxAllowance };
-
-    case WETH_ALLOWANCE_SETTING_STARTED:
-      return { ...state, wethAllowanceWaiting: true };
-
-    case WETH_ALLOWANCE_SETTING_SUCCESS:
-      return {
-        ...state,
-        wethAllowanceWaiting: false,
-        wethAllowance: UNLIMITED_ALLOWANCE_IN_BASE_UNITS
-      };
-
-    case WETH_ALLOWANCE_SETTING_ERROR:
-      return {
-        ...state,
-        wethAllowanceWaiting: false,
-        wethAllowanceError: action.error
-      };
-
-    case WETH_ALLOWANCE_SETTING_ERROR_DISMISS:
-      return { ...state, wethAllowanceError: undefined };
-
-    case ZRX_ALLOWANCE_SETTING_STARTED:
-      return { ...state, zrxAllowanceWaiting: true };
-
-    case ZRX_ALLOWANCE_SETTING_SUCCESS:
-      return {
-        ...state,
-        zrxAllowanceWaiting: false,
-        zrxAllowance: UNLIMITED_ALLOWANCE_IN_BASE_UNITS
-      };
-
-    case ZRX_ALLOWANCE_SETTING_ERROR:
-      return {
-        ...state,
-        zrxAllowanceWaiting: false,
-        zrxAllowanceError: action.error
-      };
-
-    case ZRX_ALLOWANCE_SETTING_ERROR_DISMISS:
-      return { ...state, zrxAllowanceError: undefined };
 
     default:
       return state;
@@ -137,7 +164,7 @@ function orders(state = {}, action) {
     case ORDERS_UPDATED:
       return {
         ..._.omit(state, action.deletedOrderIds),
-        ..._.merge(...action.updatedOrders.map(o => ({ [o.id]: o })))
+        ...fromEntries(action.updatedOrders.map(o => [o.id, o]))
       };
 
     case MAKE_ORDER_SUCCESS:
@@ -149,14 +176,15 @@ function orders(state = {}, action) {
   }
 }
 
-function makeOrderError(state = false, action) {
+function makeOrderError(state = null, action) {
   switch (action.type) {
     case MAKE_ORDER_FAILURE:
-      return true;
+      return action.error;
 
+    case MAKE_ORDER_REQUEST:
     case MAKE_ORDER_SUCCESS:
     case MAKE_ORDER_FAILURE_DISMISS:
-      return false;
+      return null;
 
     default:
       return state;
@@ -255,7 +283,8 @@ const rootReducer = combineReducers({
   makeOrderError,
   notifications,
   errors,
-  metamask
+  metamask,
+  tokens
 });
 
 export default rootReducer;

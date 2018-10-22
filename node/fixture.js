@@ -129,21 +129,24 @@ export function getZrxSellOrders(nodeWallet) {
     const sender = nodeWallet.address.toLowerCase();
     const maker = addresses[0];
 
-    await fixtureHelper.set0xERC20ProxyZrxUnllimitedAllowance(maker);
-    await fixtureHelper.set0xERC20ProxyWethUnllimitedAllowance(maker);
+    const makerAssetAddress = "0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c";
+    const takerAssetAddress = "0x0b1ba0af832d7c05fd64161e0db78e85978e8082";
+    const makerAssetAmount = new BigNumber(0.5e18);
+    const takerAssetAmount = new BigNumber(1e18);
+
+    await fixtureHelper.set0xProxyUnllimitedAllowance(makerAssetAddress, maker);
 
     for (let i = 0; i < 10; i++) {
       const signedOrder = await fixtureHelper.createAndSignOrder(
         maker,
         sender,
-        1e18,
-        0.5e18,
-        false
+        makerAssetAddress,
+        makerAssetAmount,
+        takerAssetAddress,
+        takerAssetAmount
       );
 
-      orders.push(
-        await getSprawlOrderFrom0xSignedOrder(signedOrder, fixtureHelper)
-      );
+      orders.push(getSprawlOrderFrom0xSignedOrder(signedOrder));
     }
 
     return orders;

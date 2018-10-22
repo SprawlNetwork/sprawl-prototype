@@ -28,11 +28,17 @@ export const makeOrderSuccess = order => ({
 
 export const MAKE_ORDER_REQUEST = "MAKE_ORDER_REQUEST";
 
-export const makeOrderRequest = (wethAmount, zrxAmount, isBuy) => ({
+export const makeOrderRequest = (
+  makerAssetAddress,
+  makerAssetAmount,
+  takerAssetAddress,
+  takerAssetAmount
+) => ({
   type: MAKE_ORDER_REQUEST,
-  wethAmount,
-  zrxAmount,
-  isBuy
+  makerAssetAddress,
+  makerAssetAmount,
+  takerAssetAddress,
+  takerAssetAmount
 });
 
 export const TAKE_ORDER_STARTED = "TAKE_ORDER_STARTED";

@@ -4,7 +4,7 @@ import { Amount } from "./Amount";
 
 export default class Order extends PureComponent {
   render() {
-    let { order, number } = this.props;
+    let { order, number, makerToken, takerToken } = this.props;
 
     return (
       <tr>
@@ -20,13 +20,13 @@ export default class Order extends PureComponent {
         <td>
           <Amount
             units={order.signedOrder.makerAssetAmount}
-            symbol={order.makerAssetSymbol}
+            symbol={makerToken.symbol}
           />
         </td>
         <td>
           <Amount
             units={order.signedOrder.takerAssetAmount}
-            symbol={order.takerAssetSymbol}
+            symbol={takerToken.symbol}
           />
         </td>
         <td className="order-date">{this._renderDate(order.receptionDate)}</td>
@@ -39,7 +39,7 @@ export default class Order extends PureComponent {
   }
 
   _renderTakeExpiredOrElse() {
-    const { order, localAccount } = this.props;
+    const { order, localAccount, takerToken } = this.props;
     const localAddress = localAccount.address;
 
     if (order.filling) {
@@ -70,11 +70,18 @@ export default class Order extends PureComponent {
       return "Expired";
     }
 
-    if (!this._hasBalance()) {
+    if (
+      takerToken.balance === undefined ||
+      takerToken.allowance === undefined
+    ) {
+      return "";
+    }
+
+    if (order.signedOrder.takerAssetAmount.gt(takerToken.balance)) {
       return <b>Not enough balance</b>;
     }
 
-    if (!this._hasAllowance()) {
+    if (order.signedOrder.takerAssetAmount.gt(takerToken.allowance)) {
       return <b>Not enough allowance</b>;
     }
 
@@ -91,32 +98,6 @@ export default class Order extends PureComponent {
 
   _isExpired() {
     return datefns.isBefore(this._getExpirationDate(), new Date());
-  }
-
-  _hasAllowance() {
-    const {
-      order,
-      localAccount: { wethAllowance, zrxAllowance }
-    } = this.props;
-    if (order.takerAssetSymbol === "WETH") {
-      return (
-        wethAllowance && wethAllowance.gte(order.signedOrder.takerAssetAmount)
-      );
-    }
-
-    return zrxAllowance && zrxAllowance.gte(order.signedOrder.takerAssetAmount);
-  }
-
-  _hasBalance() {
-    const {
-      order,
-      localAccount: { wethBalance, zrxBalance }
-    } = this.props;
-    if (order.takerAssetSymbol === "WETH") {
-      return wethBalance && wethBalance.gte(order.signedOrder.takerAssetAmount);
-    }
-
-    return zrxBalance && zrxBalance.gte(order.signedOrder.takerAssetAmount);
   }
 
   _shortHash(addr) {

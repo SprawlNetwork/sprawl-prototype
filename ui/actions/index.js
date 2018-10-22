@@ -5,3 +5,4 @@ export * from "./orders";
 export * from "./networks";
 export * from "./notifications";
 export * from "./metamask";
+export * from "./tokens";

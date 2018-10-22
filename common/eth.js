@@ -24,16 +24,16 @@ export class EthHelper {
     }
   }
 
+  async getAccounts() {
+    const accounts = this._ethersWallet
+      ? [this._ethersWallet.address]
+      : await this._ethersProvider.listAccounts();
+
+    return accounts.map(a => a.toString().toLowerCase());
+  }
+
   async getEthBalance(address) {
     return this._ethersProvider.getBalance(address);
-  }
-
-  async getWethBalance(address) {
-    return this._getTokenBalance(await this.getWethAddress(), address);
-  }
-
-  async getZrxBalance(address) {
-    return this._getTokenBalance(await this.getZrxAddress(), address);
   }
 
   async getTokenSymbol(tokenAddress) {
@@ -61,40 +61,6 @@ export class EthHelper {
     return token.symbol();
   }
 
-  async get0xERC20ProxyWethAllowance(address) {
-    return this._getTokenAllowance(
-      await this.getWethAddress(),
-      address,
-      await this.get0xERC20ProxyAddress()
-    );
-  }
-
-  async get0xERC20ProxyZrxAllowance(address) {
-    return this._getTokenAllowance(
-      await this.getZrxAddress(),
-      address,
-      await this.get0xERC20ProxyAddress()
-    );
-  }
-
-  async set0xERC20ProxyWethUnllimitedAllowance(address) {
-    const wrapper = await this._getContractsWrapper();
-    return wrapper.erc20Token.setUnlimitedAllowanceAsync(
-      await this.getWethAddress(),
-      address,
-      await this.get0xERC20ProxyAddress()
-    );
-  }
-
-  async set0xERC20ProxyZrxUnllimitedAllowance(address) {
-    const wrapper = await this._getContractsWrapper();
-    return wrapper.erc20Token.setUnlimitedAllowanceAsync(
-      await this.getZrxAddress(),
-      address,
-      await this.get0xERC20ProxyAddress()
-    );
-  }
-
   async getWethAddress() {
     if (this._wethAddress === undefined) {
       const wrapper = await this._getContractsWrapper();
@@ -102,15 +68,6 @@ export class EthHelper {
     }
 
     return this._wethAddress;
-  }
-
-  async getZrxAddress() {
-    if (this._zrxAddress === undefined) {
-      const wrapper = await this._getContractsWrapper();
-      this._zrxAddress = wrapper.exchange.getZRXTokenAddress();
-    }
-
-    return this._zrxAddress;
   }
 
   async get0xERC20ProxyAddress() {
@@ -142,34 +99,18 @@ export class EthHelper {
   async createAndSignOrder(
     makerAddress,
     senderAddress,
-    wethAmount,
-    zrxAmount,
-    isZrxPurchaseOrder
+    makerAssetAddress,
+    makerAssetAmount,
+    takerAssetAddress,
+    takerAssetAmount
   ) {
-    if (isZrxPurchaseOrder) {
-      const wethBalance = await this.getWethBalance(makerAddress);
-      const wethAllowance = await this.get0xERC20ProxyWethAllowance(
-        makerAddress
-      );
+    const makerAssetAllowance = await this.getToken0xProxyAllowance(
+      makerAssetAddress,
+      makerAddress
+    );
 
-      if (wethBalance.lt(wethAmount)) {
-        throw new Error("Not enough funds");
-      }
-
-      if (wethAllowance.lt(wethAmount)) {
-        throw new Error("Not enough allowance");
-      }
-    } else {
-      const zrxBalance = await this.getZrxBalance(makerAddress);
-      const zrxAllowance = await this.get0xERC20ProxyZrxAllowance(makerAddress);
-
-      if (zrxBalance.lt(zrxAmount)) {
-        throw new Error("Not enough funds");
-      }
-
-      if (zrxAllowance.lt(zrxAmount)) {
-        throw new Error("Not enough allowance");
-      }
+    if (makerAssetAllowance.lt(makerAssetAmount)) {
+      throw new Error("Not enough allowance");
     }
 
     const tomorrow = datefns.addDays(new Date(), 1);
@@ -177,23 +118,8 @@ export class EthHelper {
 
     const wrapper = await this._getContractsWrapper();
 
-    let makerAssetAmount = new BigNumber(zrxAmount);
-    let takerAssetAmount = new BigNumber(wethAmount);
-    let makerAssetData = assetDataUtils.encodeERC20AssetData(
-      await this.getZrxAddress()
-    );
-    let takerAssetData = assetDataUtils.encodeERC20AssetData(
-      await this.getWethAddress()
-    );
-
-    if (isZrxPurchaseOrder) {
-      [makerAssetAmount, takerAssetAmount] = [
-        takerAssetAmount,
-        makerAssetAmount
-      ];
-
-      [makerAssetData, takerAssetData] = [takerAssetData, makerAssetData];
-    }
+    let makerAssetData = assetDataUtils.encodeERC20AssetData(makerAssetAddress);
+    let takerAssetData = assetDataUtils.encodeERC20AssetData(takerAssetAddress);
 
     const order = {
       exchangeAddress: wrapper.exchange.getContractAddress(),
@@ -280,13 +206,20 @@ export class EthHelper {
 
   async ___testMetamaskBugWithGanache(address) {
     /*global console*/
-    console.log(await this.get0xERC20ProxyWethAllowance(address));
-    const tx = await this.set0xERC20ProxyWethUnllimitedAllowance(address);
+    console.log(
+      await this.getToken0xProxyAllowance(await this.getWethAddress(), address)
+    );
+    const tx = await this.set0xProxyUnllimitedAllowance(
+      await this.getWethAddress(),
+      address
+    );
     console.log(tx);
     console.log(await this._ethersProvider.waitForTransaction(tx));
 
     // This call returns an outdated value
-    console.log(await this.get0xERC20ProxyWethAllowance(address));
+    console.log(
+      await this.getToken0xProxyAllowance(await this.getWethAddress(), address)
+    );
   }
 
   _get0xProvider() {
@@ -386,7 +319,7 @@ export class EthHelper {
     };
   }
 
-  async _getTokenBalance(tokenAddress, address) {
+  async getTokenBalance(tokenAddress, address) {
     const token = new ethers.Contract(
       tokenAddress,
       ERC20Artifact.compilerOutput.abi,
@@ -394,6 +327,23 @@ export class EthHelper {
     );
 
     return token.functions.balanceOf(address).then(v => new BigNumber(v));
+  }
+
+  async getToken0xProxyAllowance(tokenAddress, address) {
+    return this._getTokenAllowance(
+      tokenAddress,
+      address,
+      await this.get0xERC20ProxyAddress()
+    );
+  }
+
+  async set0xProxyUnllimitedAllowance(tokenAddress, address) {
+    const wrapper = await this._getContractsWrapper();
+    return wrapper.erc20Token.setUnlimitedAllowanceAsync(
+      tokenAddress,
+      address,
+      await this.get0xERC20ProxyAddress()
+    );
   }
 
   async _getTokenAllowance(tokenAddress, tokensOwner, approvedAddress) {

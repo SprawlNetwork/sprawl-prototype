@@ -40,10 +40,4 @@ export const allowanceIsBigEnough = allowance =>
     )
   );
 
-export const hasWethAllowanceError = state =>
-  !!state.localAccount.wethAllowanceError;
-
-export const hasZrxAllowanceError = state =>
-  !!state.localAccount.zrxAllowanceError;
-
 export const isMetaMaskLoading = state => state.metamask.loading;

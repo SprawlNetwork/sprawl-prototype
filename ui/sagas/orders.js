@@ -11,7 +11,6 @@ import {
 } from "../actions";
 import * as _ from "lodash";
 import { updateWhileConnected } from "./node";
-import { BigNumber } from "bignumber.js";
 import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
 
 const SIGNATURE_CANCELLED_BY_USER = -32603;
@@ -45,10 +44,8 @@ export function* updateOrdersSaga() {
 export function* makeOrderSaga(
   ethHelper,
   localAddress,
-  { wethAmount, zrxAmount, isBuy }
+  { makerAssetAddress, makerAssetAmount, takerAssetAddress, takerAssetAmount }
 ) {
-  const ONE = new BigNumber(1e18);
-
   try {
     const senderAddress = yield select(state => state.remoteAccount.address);
 
@@ -56,17 +53,14 @@ export function* makeOrderSaga(
       ethHelper.createAndSignOrder(
         localAddress,
         senderAddress,
-        ONE.mul(wethAmount),
-        ONE.mul(zrxAmount),
-        isBuy
+        makerAssetAddress,
+        makerAssetAmount,
+        takerAssetAddress,
+        takerAssetAmount
       )
     );
 
-    const sprawlOrder = yield call(
-      getSprawlOrderFrom0xSignedOrder,
-      signedOrder,
-      ethHelper
-    );
+    const sprawlOrder = getSprawlOrderFrom0xSignedOrder(signedOrder);
 
     const node = yield select(nodeAddress);
     const order = yield call(callNode, node, "sendOrder", sprawlOrder);

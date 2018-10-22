@@ -1,25 +1,23 @@
 import { assetDataUtils, orderHashUtils } from "@0xproject/order-utils";
 
-async function getSymbolFromAssetData(assetData, ethHelper) {
+function _getSymbolFromAssetData(assetData, ethHelper) {
   const address = assetDataUtils.decodeERC20AssetData(assetData).tokenAddress;
   return ethHelper.getTokenSymbol(address);
 }
 
-export async function getSprawlOrderFrom0xSignedOrder(signedOrder, ethHelper) {
+export function getSprawlOrderFrom0xSignedOrder(signedOrder) {
   const hash = orderHashUtils.getOrderHashHex(signedOrder);
 
   return {
     id: hash,
     creationDate: new Date(),
     receptionDate: undefined,
-    makerAssetSymbol: await getSymbolFromAssetData(
-      signedOrder.makerAssetData,
-      ethHelper
-    ),
-    takerAssetSymbol: await getSymbolFromAssetData(
-      signedOrder.takerAssetData,
-      ethHelper
-    ),
+    makerAssetAddress: assetDataUtils.decodeERC20AssetData(
+      signedOrder.makerAssetData
+    ).tokenAddress,
+    takerAssetAddress: assetDataUtils.decodeERC20AssetData(
+      signedOrder.takerAssetData
+    ).tokenAddress,
     isValid: true,
     filling: false,
     fillingTx: undefined,

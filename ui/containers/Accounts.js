@@ -3,14 +3,11 @@ import { connect } from "react-redux";
 
 import AccountCard from "../components/AccountCard";
 import Faucet from "../components/Faucet";
-import {
-  localAccountWethAllowanceRequest,
-  localAccountZrxAllowanceRequest
-} from "../actions";
+import { tokenSetAllowanceRequest } from "../actions";
 
 class Accounts extends PureComponent {
   render() {
-    let { localAccount, remoteAccount } = this.props;
+    let { localAccount, remoteAccount, tokens } = this.props;
 
     return (
       <>
@@ -39,33 +36,25 @@ class Accounts extends PureComponent {
             />
 
             <AccountCard
-              symbol={"WETH"}
-              balance={localAccount.wethBalance}
-              withAllowance={true}
-              allowance={localAccount.wethAllowance}
-              waitingAllowance={localAccount.wethAllowanceWaiting}
-              giveAllowance={() =>
-                this.props.dispatch(localAccountWethAllowanceRequest())
-              }
-            />
-
-            <AccountCard
-              symbol={"ZRX"}
-              balance={localAccount.zrxBalance}
-              withAllowance={true}
-              allowance={localAccount.zrxAllowance}
-              waitingAllowance={localAccount.zrxAllowanceWaiting}
-              giveAllowance={() =>
-                this.props.dispatch(localAccountZrxAllowanceRequest())
-              }
-            />
-
-            <AccountCard
               title={"Node's ETH"}
               symbol={"ETH"}
               balance={remoteAccount.ethBalance}
               withAllowance={false}
             />
+
+            {Object.values(tokens).map(t => (
+              <AccountCard
+                key={t.address}
+                symbol={t.symbol}
+                balance={t.balance}
+                withAllowance={true}
+                allowance={t.allowance}
+                waitingAllowance={t.waitingForAllowance}
+                giveAllowance={() => {
+                  this.props.dispatch(tokenSetAllowanceRequest(t.address));
+                }}
+              />
+            ))}
           </div>
         </div>
       </>
@@ -73,10 +62,11 @@ class Accounts extends PureComponent {
   }
 }
 
-const mapStateToProps = ({ localAccount, remoteAccount, errors }) => ({
+const mapStateToProps = ({ localAccount, remoteAccount, errors, tokens }) => ({
   localAccount,
   remoteAccount,
-  allowanceError: errors.allowanceError
+  allowanceError: errors.allowanceError,
+  tokens
 });
 
 export default connect(mapStateToProps)(Accounts);

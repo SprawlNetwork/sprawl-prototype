@@ -10,16 +10,13 @@ import {
   nodeAddressChanged,
   connectionToNodeRequested,
   takeOrderRequest,
-  wethAllowanceSettingErrorDismiss,
-  zrxAllowanceSettingErrorDismiss
+  tokenSetAllowanceErrorDismiss
 } from "../actions";
 import Notifications from "./Notifications";
 import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
 import {
   connectedToNode,
   couldNotConnectToNode,
-  hasWethAllowanceError,
-  hasZrxAllowanceError,
   isMetaMaskLoading,
   lostConnectionToNode,
   metaMaskInWrongNetwork,
@@ -40,8 +37,20 @@ class App extends Component {
     }
   };
 
-  onOrderMade = ({ wethAmount, zrxAmount, isBuy }) => {
-    this.props.dispatch(makeOrderRequest(wethAmount, zrxAmount, isBuy));
+  onOrderMade = ({
+    makerAssetAddress,
+    makerAssetAmount,
+    takerAssetAddress,
+    takerAssetAmount
+  }) => {
+    this.props.dispatch(
+      makeOrderRequest(
+        makerAssetAddress,
+        makerAssetAmount,
+        takerAssetAddress,
+        takerAssetAmount
+      )
+    );
   };
 
   onTakeOrder = order => {
@@ -56,8 +65,6 @@ class App extends Component {
       lostConnectionToNode,
       metaMaskInWrongNetwork,
       remoteNetworkId,
-      hasWethAllowanceError,
-      hasZrxAllowanceError,
       isMetaMaskLoading
     } = this.props;
 
@@ -99,17 +106,15 @@ class App extends Component {
 
         <Notifications />
 
-        <AllowanceError
-          isOpen={hasWethAllowanceError}
-          dismiss={() =>
-            this.props.dispatch(wethAllowanceSettingErrorDismiss())
-          }
-        />
-
-        <AllowanceError
-          isOpen={hasZrxAllowanceError}
-          dismiss={() => this.props.dispatch(zrxAllowanceSettingErrorDismiss())}
-        />
+        {Object.values(this.props.tokens).map(t => (
+          <AllowanceError
+            key={t.address}
+            isOpen={t.allowanceError !== undefined}
+            dismiss={() =>
+              this.props.dispatch(tokenSetAllowanceErrorDismiss(t.address))
+            }
+          />
+        ))}
       </>
     );
   }
@@ -123,7 +128,6 @@ export default connectSelectors({
   couldNotConnectToNode,
   lostConnectionToNode,
   remoteNetworkId,
-  hasWethAllowanceError,
-  hasZrxAllowanceError,
-  isMetaMaskLoading
+  isMetaMaskLoading,
+  tokens: state => state.tokens
 })(App);

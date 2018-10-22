@@ -24,7 +24,8 @@ import {
   PEER_REMOVED,
   remoteAccountAddressChanged,
   remoteAccountBalanceUpdated,
-  remoteNetworkIdChanged
+  remoteNetworkIdChanged,
+  tokenAdded
 } from "../actions";
 import { delay } from "redux-saga";
 import { periodicallyUpdateOrdersSaga, updateOrdersSaga } from "./orders";
@@ -128,12 +129,48 @@ function* connectToNode(ethHelper, dispatch, { nodeAddress: node }) {
   try {
     yield put(connectionToNodeStarted());
 
-    const response = yield call(callNode, node, "getNodeInfo");
-    yield put(remoteNetworkIdChanged(response.networkId));
-    yield put(remoteAccountAddressChanged(response.address));
+    const { networkId, address } = yield call(callNode, node, "getNodeInfo");
+    yield put(remoteNetworkIdChanged(networkId));
+    yield put(remoteAccountAddressChanged(address));
 
     websocketUpdater = new WebsocketUpdater(dispatch);
     websocketUpdater.start(node);
+
+    const tokens = [];
+
+    if (networkId === 50) {
+      tokens.push({
+        name: "Wrapped ETH",
+        symbol: "WETH",
+        address: "0x0b1ba0af832d7c05fd64161e0db78e85978e8082",
+        decimals: 18,
+        hasFaucet: false
+      });
+
+      tokens.push({
+        name: "0x Token",
+        symbol: "ZRX",
+        address: "0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c",
+        decimals: 18,
+        hasFaucet: false
+      });
+    } else if (networkId === 3) {
+      // ROPSTEN
+
+      tokens.push({
+        name: "Wrapped ETH",
+        symbol: "WETH",
+        address: "0xc778417e063141139fce010982780140aa0cd5ab",
+        decimals: 18,
+        hasFaucet: false
+      });
+    } else {
+      console.error("Sprawl is not working on network yet", networkId);
+    }
+
+    for (const token of tokens) {
+      yield put(tokenAdded(token));
+    }
 
     yield put(connectionToNodeSuccess());
 

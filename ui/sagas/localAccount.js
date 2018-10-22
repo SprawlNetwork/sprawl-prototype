@@ -9,25 +9,22 @@ import {
 import { delay } from "redux-saga";
 import {
   LOCAL_ACCOUNT_ADDRESS_CHANGED,
-  LOCAL_ACCOUNT_WETH_ALLOWANCE_REQUEST,
-  LOCAL_ACCOUNT_ZRX_ALLOWANCE_REQUEST,
   localAccountAddressChanged,
   localAccountEthBalanceUpdated,
-  localAccountWethAllowanceUpdated,
-  localAccountWethBalanceUpdated,
-  localAccountZrxAllowanceUpdated,
-  localAccountZrxBalanceUpdated,
   MAKE_ORDER_REQUEST,
   TAKE_ORDER_REQUEST,
-  wethAllowanceSettingError,
-  wethAllowanceSettingStarted,
-  wethAllowanceSettingSuccess,
-  zrxAllowanceSettingError,
-  zrxAllowanceSettingStarted,
-  zrxAllowanceSettingSuccess
+  TOKEN_ADDED,
+  TOKEN_SET_ALLOWANCE_REQUEST,
+  tokenAllowanceUpdated,
+  tokenBalanceUpdated,
+  tokenSetAllowanceFailed,
+  tokenSetAllowanceStarted,
+  tokenSetAllowanceSuccess
 } from "../actions";
 import { localAccountAddress, metaMaskUnlocked } from "../selectors";
 import { makeOrderSaga, takeOrderSaga } from "./orders";
+
+const UPDATES_INTERVAL = 3000;
 
 function arEqual(current, updated) {
   if (current !== undefined && current.eq !== undefined) {
@@ -71,85 +68,80 @@ function* updateValue(
   }
 }
 
-const updateLocalAccountAddressSaga = () =>
+const updateLocalAccountAddressSaga = ethHelper =>
   updateValue(
     localAccountAddress,
-    () => window.web3 && window.web3.eth.accounts[0],
+    () => ethHelper.getAccounts().then(accs => accs[0]),
     localAccountAddressChanged,
     "local account address"
   );
 
 function* localAccountActionsAndUpdatesSaga(ethHelper, { address }) {
-  const UPDATES_INTERVAL = 3000;
-
   try {
-    yield takeEvery(
-      LOCAL_ACCOUNT_WETH_ALLOWANCE_REQUEST,
-      createSetAllowanceSaga(
-        () => ethHelper.set0xERC20ProxyWethUnllimitedAllowance(address),
-        wethAllowanceSettingStarted,
-        wethAllowanceSettingSuccess,
-        wethAllowanceSettingError
-      ),
-      ethHelper
-    );
-
-    yield takeEvery(
-      LOCAL_ACCOUNT_ZRX_ALLOWANCE_REQUEST,
-      createSetAllowanceSaga(
-        () => ethHelper.set0xERC20ProxyZrxUnllimitedAllowance(address),
-        zrxAllowanceSettingStarted,
-        zrxAllowanceSettingSuccess,
-        zrxAllowanceSettingError
-      ),
-      ethHelper
-    );
-
     yield takeEvery(MAKE_ORDER_REQUEST, makeOrderSaga, ethHelper, address);
     yield takeEvery(TAKE_ORDER_REQUEST, takeOrderSaga, ethHelper, address);
 
-    yield all([
-      updateValue(
-        state => state.localAccount.ethBalance,
-        () => ethHelper.getEthBalance(address),
-        localAccountEthBalanceUpdated,
-        "ETH balance of " + address,
-        UPDATES_INTERVAL
-      ),
-      updateValue(
-        state => state.localAccount.wethBalance,
-        () => ethHelper.getWethBalance(address),
-        localAccountWethBalanceUpdated,
-        "WETH balance of " + address,
-        UPDATES_INTERVAL
-      ),
-      updateValue(
-        state => state.localAccount.zrxBalance,
-        () => ethHelper.getZrxBalance(address),
-        localAccountZrxBalanceUpdated,
-        "ZRX balance of " + address,
-        UPDATES_INTERVAL
-      ),
-      updateValue(
-        state => state.localAccount.wethAllowance,
-        () => ethHelper.get0xERC20ProxyWethAllowance(address),
-        localAccountWethAllowanceUpdated,
-        "WETH allowance of " + address,
-        UPDATES_INTERVAL
-      ),
-      updateValue(
-        state => state.localAccount.zrxAllowance,
-        () => ethHelper.get0xERC20ProxyZrxAllowance(address),
-        localAccountZrxAllowanceUpdated,
-        "ZRX allowance of " + address,
-        UPDATES_INTERVAL
-      )
-    ]);
+    yield call(
+      updateValue,
+      state => state.localAccount.ethBalance,
+      () => ethHelper.getEthBalance(address),
+      localAccountEthBalanceUpdated,
+      "ETH balance of " + address,
+      UPDATES_INTERVAL
+    );
   } catch (error) {
     console.error(
       "Error updating local account " + address + " balances and allowances",
       error
     );
+  }
+}
+
+function* tokenUpdatesSaga(ethHelper) {
+  try {
+    const address = yield select(state => state.localAccount.address);
+
+    yield takeEvery(
+      TOKEN_SET_ALLOWANCE_REQUEST,
+      createSetAllowanceSaga(
+        tokenAddress =>
+          ethHelper.set0xProxyUnllimitedAllowance(tokenAddress, address),
+        tokenSetAllowanceStarted,
+        tokenSetAllowanceSuccess,
+        tokenSetAllowanceFailed
+      ),
+      ethHelper
+    );
+
+    const tokenAddresses = yield select(state => Object.keys(state.tokens));
+
+    const tasks = [];
+
+    for (const tokenAddress of tokenAddresses) {
+      tasks.push(
+        updateValue(
+          state => state.tokens[tokenAddress].balance,
+          () => ethHelper.getTokenBalance(tokenAddress, address),
+          newValue => tokenBalanceUpdated(tokenAddress, newValue),
+          "Token balance update of " + tokenAddress,
+          UPDATES_INTERVAL
+        )
+      );
+
+      tasks.push(
+        updateValue(
+          state => state.tokens[tokenAddress].allowance,
+          () => ethHelper.getToken0xProxyAllowance(tokenAddress, address),
+          newValue => tokenAllowanceUpdated(tokenAddress, newValue),
+          "Token allowance update of " + tokenAddress,
+          UPDATES_INTERVAL
+        )
+      );
+    }
+
+    yield all(tasks);
+  } catch (error) {
+    console.error("Error updating tokens' values", error);
   }
 }
 
@@ -159,22 +151,28 @@ function createSetAllowanceSaga(
   allowanceSettingSuccessActionCreator,
   allowanceSettingErrorActionCreator
 ) {
-  return function*(ethHelper) {
+  return function*(ethHelper, action) {
     try {
-      yield put(allowanceSettingStartedActionCreator());
+      yield put(allowanceSettingStartedActionCreator(action.address));
 
-      const tx = yield call(allowanceSetter);
+      const tx = yield call(allowanceSetter, action.address);
       yield call(() => ethHelper.waitForTxMinned(tx));
 
-      yield put(allowanceSettingSuccessActionCreator());
+      yield put(allowanceSettingSuccessActionCreator(action.address));
     } catch (e) {
       console.error("Error setting allowance", e);
-      yield put(allowanceSettingErrorActionCreator(e));
+      yield put(allowanceSettingErrorActionCreator(action.address, e));
     }
   };
 }
 
 function* startUpdatingNewAccountsSaga(ethHelper) {
+  yield takeLatest(
+    [LOCAL_ACCOUNT_ADDRESS_CHANGED, TOKEN_ADDED],
+    tokenUpdatesSaga,
+    ethHelper
+  );
+
   yield takeLatest(
     LOCAL_ACCOUNT_ADDRESS_CHANGED,
     localAccountActionsAndUpdatesSaga,
@@ -186,7 +184,7 @@ export function* localAccountSaga(ethHelper) {
   try {
     yield all([
       startUpdatingNewAccountsSaga(ethHelper),
-      updateLocalAccountAddressSaga()
+      updateLocalAccountAddressSaga(ethHelper)
     ]);
   } catch (error) {
     console.error("Error in local account saga", error);

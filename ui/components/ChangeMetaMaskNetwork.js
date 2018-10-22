@@ -9,7 +9,7 @@ export default class ChangeMetaMaskNetwork extends Component {
         <div>
           <h2>
             Please change the network in MetaMask to{" "}
-            {this.getTargetNetworkName()}
+            {this.getTargetNetworkName()} and refresh
           </h2>
         </div>
       </div>

@@ -3,9 +3,7 @@ import * as datefns from "date-fns";
 import { connect } from "react-redux";
 import Order from "../components/Order";
 
-function Orders(props) {
-  let { orders, localAccount, onTakeOrder } = props;
-
+function Orders({ orders, localAccount, onTakeOrder, tokens }) {
   const sortedOrders = Object.values(orders).sort((o1, o2) =>
     datefns.compareAsc(o1.receptionDate, o2.receptionDate)
   );
@@ -45,6 +43,8 @@ function Orders(props) {
               number={i}
               localAccount={localAccount}
               onTakeOrder={onTakeOrder}
+              makerToken={tokens[o.makerAssetAddress]}
+              takerToken={tokens[o.takerAssetAddress]}
             />
           ))}
         </tbody>
@@ -53,10 +53,14 @@ function Orders(props) {
   );
 }
 
-const mapStateToProps = ({ localAccount, orders }, { onTakeOrder }) => ({
+const mapStateToProps = (
+  { localAccount, orders, tokens },
+  { onTakeOrder }
+) => ({
   localAccount,
   orders,
-  onTakeOrder
+  onTakeOrder,
+  tokens
 });
 
 export default connect(mapStateToProps)(Orders);
