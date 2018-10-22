@@ -1,5 +1,4 @@
 import { applyMiddleware, createStore } from "redux";
-import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 
 import rootReducer from "./reducers";
@@ -9,7 +8,7 @@ const configureStore = (sagaMiddleware, preloadedState) => {
   return createStore(
     rootReducer,
     preloadedState,
-    composeWithDevTools(applyMiddleware(sagaMiddleware, thunk, createLogger()))
+    composeWithDevTools(applyMiddleware(sagaMiddleware, createLogger()))
   );
 };
 

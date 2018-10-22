@@ -1,10 +1,3 @@
-// const {
-//   ContractWrappers,
-//   orderHashUtils,
-//   signatureUtils,
-//   assetDataUtils,
-//   SignerType,
-// } = require("0x.js");
 import {
   MnemonicWalletSubprovider,
   RPCSubprovider,
