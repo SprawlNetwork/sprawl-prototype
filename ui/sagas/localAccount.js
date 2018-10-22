@@ -56,6 +56,7 @@ function* updateValue(
       console.error("Error updating " + title, error);
     }
 
+    // eslint-disable-next-line redux-saga/no-unhandled-errors
     yield delay(interval);
   }
 }

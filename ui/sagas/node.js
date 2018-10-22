@@ -54,6 +54,7 @@ function* checkConnectionStatusSaga() {
       console.error("Error checking connection state", error);
     }
 
+    // eslint-disable-next-line redux-saga/no-unhandled-errors
     yield delay(10000);
   }
 }
@@ -70,6 +71,7 @@ export function* updateWhileConnected(updater, interval = 1000, ...args) {
       console.error("Error running update", error);
     }
 
+    // eslint-disable-next-line redux-saga/no-unhandled-errors
     yield delay(interval);
   }
 }
@@ -92,6 +94,7 @@ function* updateRemoteAccountBalanceSaga(ethHelper) {
       console.error("Error updating remote account balance", error);
     }
 
+    // eslint-disable-next-line redux-saga/no-unhandled-errors
     yield delay(5000);
   }
 }
