@@ -28,8 +28,6 @@ const defaultNodeAddress = window.location.search
 store.dispatch(nodeAddressChanged(defaultNodeAddress));
 
 window.addEventListener("load", () => {
-  store.dispatch(metamaskLoaded());
-
   const injectedProvider = window.ethereum
     ? window.ethereum
     : window.web3.currentProvider;
@@ -43,6 +41,8 @@ window.addEventListener("load", () => {
     .then(id => store.dispatch(localNetworkIdChanged(id)));
 
   sagaMiddleware.run(rootSaga, ethHelper, store.dispatch.bind(store));
+
+  store.dispatch(metamaskLoaded());
 });
 
 ReactDOM.render(
