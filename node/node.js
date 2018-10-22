@@ -113,6 +113,8 @@ export default class Node {
   async stop() {
     await this._stopPeerDiscovery();
     await this._stopRPC();
-    this._dex._stop();
+    if (this._dex) {
+      this._dex._stop();
+    }
   }
 }
