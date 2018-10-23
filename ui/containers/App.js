@@ -28,7 +28,7 @@ import {
 import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
 import AllowanceError from "../components/AllowanceError";
 import LoadingMessage from "../components/LoadingMessage";
-import { connectSelectors } from "../redux";
+import { connectSelectors } from "../utils";
 import FaucetError from "../components/FaucetError";
 
 class App extends Component {

@@ -1,5 +1,5 @@
 import { PureComponent } from "react";
-import { connectSelectors } from "../redux";
+import { connectSelectors } from "../utils";
 import React from "react";
 
 class ErrorsBoundary extends PureComponent {
