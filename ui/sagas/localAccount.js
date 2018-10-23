@@ -181,7 +181,6 @@ function createTokenSetWithTxSaga(
 
       const tx = yield call(setter, action.address);
       yield call(() => ethHelper.waitForTxMinned(tx));
-      yield delay(500);
 
       yield put(successActionCreator(action.address));
     } catch (e) {
