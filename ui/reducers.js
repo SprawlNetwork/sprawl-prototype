@@ -70,7 +70,6 @@ function tokens(state = {}, action) {
       );
 
     case TOKEN_BALANCE_UPDATED:
-      console.log(action);
       return {
         ...state,
         [action.address]: { ...state[action.address], balance: action.balance }
