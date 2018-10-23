@@ -31,6 +31,7 @@ import {
 import { localAccountAddress, metaMaskUnlocked } from "../selectors";
 import { makeOrderSaga, takeOrderSaga } from "./orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
+import { apply } from "../utils";
 
 const UPDATES_INTERVAL = 3000;
 
@@ -182,7 +183,7 @@ function createTokenSetWithTxSaga(
       yield put(startedActionCreator(action.address));
 
       const tx = yield call(setter, action.address);
-      yield call(() => ethHelper.waitForTxMinned(tx));
+      yield apply(ethHelper, ethHelper.waitForTxMinned, tx);
 
       yield put(successActionCreator(action.address));
     } catch (e) {
