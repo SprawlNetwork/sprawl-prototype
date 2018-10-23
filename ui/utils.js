@@ -11,4 +11,4 @@ export const connectSelectors = (selectorsMap = {}) =>
   );
 
 // eslint-disable-next-line redux-saga/no-unhandled-errors
-export const apply = (obj, func, ...args) => call([obj, func], args);
+export const callMethod = (obj, func, ...args) => call([obj, func], args);

@@ -13,7 +13,7 @@ import * as _ from "lodash";
 import { updateWhileConnected } from "./node";
 import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
-import { apply } from "../utils";
+import { callMethod } from "../utils";
 
 export function* updateOrdersSaga() {
   // eslint-disable-next-line redux-saga/no-unhandled-errors
@@ -49,7 +49,7 @@ export function* makeOrderSaga(
   try {
     const senderAddress = yield select(state => state.remoteAccount.address);
 
-    const signedOrder = yield apply(
+    const signedOrder = yield callMethod(
       ethHelper,
       ethHelper.createAndSignOrder,
       localAddress,
@@ -78,7 +78,7 @@ export function* makeOrderSaga(
 
 export function* takeOrderSaga(ethHelper, localAddress, { order }) {
   try {
-    const signedTakeOrderTransaction = yield apply(
+    const signedTakeOrderTransaction = yield callMethod(
       ethHelper,
       ethHelper.signTakeOrderTransaction,
       localAddress,
