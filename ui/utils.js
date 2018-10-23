@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import { call } from "redux-saga/effects";
+import { apply } from "redux-saga/effects";
 
 export const connectSelectors = (selectorsMap = {}) =>
   connect((state, ownProps = {}) =>
@@ -11,4 +11,4 @@ export const connectSelectors = (selectorsMap = {}) =>
   );
 
 // eslint-disable-next-line redux-saga/no-unhandled-errors
-export const callMethod = (obj, func, ...args) => call([obj, func], args);
+export const callMethod = (obj, func, ...args) => apply(obj, func, args);
