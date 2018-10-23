@@ -57,3 +57,53 @@ export const tokenSetAllowanceErrorDismiss = address => ({
   type: TOKEN_SET_ALLOWANCE_ERROR_DISMISS,
   address
 });
+
+export const TOKEN_SET_ALLOWANCE_CANCELLED = "TOKEN_SET_ALLOWANCE_CANCELLED";
+
+export const tokenSetAllowanceCancelled = address => ({
+  type: TOKEN_SET_ALLOWANCE_CANCELLED,
+  address
+});
+
+export const TOKEN_FAUCET_REQUESTED = "TOKEN_FAUCET_REQUESTED";
+
+export const tokenFaucetRequested = address => ({
+  type: TOKEN_FAUCET_REQUESTED,
+  address
+});
+
+export const TOKEN_FAUCET_STARTED = "TOKEN_FAUCET_STARTED";
+
+export const tokenFaucetStarted = address => ({
+  type: TOKEN_FAUCET_STARTED,
+  address
+});
+
+export const TOKEN_FAUCET_FAILED = "TOKEN_FAUCET_FAILED";
+
+export const tokenFaucetFailed = (address, error) => ({
+  type: TOKEN_FAUCET_FAILED,
+  address,
+  error
+});
+
+export const TOKEN_FAUCET_SUCCESS = "TOKEN_FAUCET_SUCCESS";
+
+export const tokenFaucetSuccess = address => ({
+  type: TOKEN_FAUCET_SUCCESS,
+  address
+});
+
+export const TOKEN_FAUCET_ERROR_DISMISS = "TOKEN_FAUCET_ERROR_DISMISS";
+
+export const tokenFaucetErrorDismiss = address => ({
+  type: TOKEN_FAUCET_ERROR_DISMISS,
+  address
+});
+
+export const TOKEN_FAUCET_CANCELLED = "TOKEN_FAUCET_CANCELLED";
+
+export const tokenFaucetCancelled = address => ({
+  type: TOKEN_FAUCET_CANCELLED,
+  address
+});

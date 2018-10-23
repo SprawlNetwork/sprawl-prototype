@@ -32,7 +32,13 @@ import {
   TOKEN_SET_ALLOWANCE_FAILED,
   TOKEN_SET_ALLOWANCE_SUCCESS,
   TOKEN_SET_ALLOWANCE_ERROR_DISMISS,
-  MAKE_ORDER_REQUEST
+  MAKE_ORDER_REQUEST,
+  TOKEN_FAUCET_STARTED,
+  TOKEN_FAUCET_SUCCESS,
+  TOKEN_FAUCET_FAILED,
+  TOKEN_FAUCET_ERROR_DISMISS,
+  TOKEN_FAUCET_CANCELLED,
+  TOKEN_SET_ALLOWANCE_CANCELLED
 } from "./actions";
 import { fromEntries } from "../common/utils";
 
@@ -107,12 +113,59 @@ function tokens(state = {}, action) {
         }
       };
 
+    case TOKEN_SET_ALLOWANCE_CANCELLED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForAllowance: false
+        }
+      };
+
     case TOKEN_SET_ALLOWANCE_ERROR_DISMISS:
       return {
         ...state,
         [action.address]: {
           ...state[action.address],
           allowanceError: undefined
+        }
+      };
+
+    case TOKEN_FAUCET_STARTED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForFaucet: true
+        }
+      };
+
+    case TOKEN_FAUCET_CANCELLED:
+    case TOKEN_FAUCET_SUCCESS:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForFaucet: false
+        }
+      };
+
+    case TOKEN_FAUCET_FAILED:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          waitingForFaucet: false,
+          faucetError: action.error
+        }
+      };
+
+    case TOKEN_FAUCET_ERROR_DISMISS:
+      return {
+        ...state,
+        [action.address]: {
+          ...state[action.address],
+          faucetError: undefined
         }
       };
 

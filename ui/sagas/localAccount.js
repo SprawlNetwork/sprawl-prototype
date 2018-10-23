@@ -14,15 +14,22 @@ import {
   MAKE_ORDER_REQUEST,
   TAKE_ORDER_REQUEST,
   TOKEN_ADDED,
+  TOKEN_FAUCET_REQUESTED,
   TOKEN_SET_ALLOWANCE_REQUEST,
   tokenAllowanceUpdated,
   tokenBalanceUpdated,
+  tokenFaucetCancelled,
+  tokenFaucetFailed,
+  tokenFaucetStarted,
+  tokenFaucetSuccess,
+  tokenSetAllowanceCancelled,
   tokenSetAllowanceFailed,
   tokenSetAllowanceStarted,
   tokenSetAllowanceSuccess
 } from "../actions";
 import { localAccountAddress, metaMaskUnlocked } from "../selectors";
 import { makeOrderSaga, takeOrderSaga } from "./orders";
+import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 
 const UPDATES_INTERVAL = 3000;
 
@@ -103,12 +110,27 @@ function* tokenUpdatesSaga(ethHelper) {
 
     yield takeEvery(
       TOKEN_SET_ALLOWANCE_REQUEST,
-      createSetAllowanceSaga(
+      createTokenSetWithTxSaga(
         tokenAddress =>
           ethHelper.set0xProxyUnllimitedAllowance(tokenAddress, address),
         tokenSetAllowanceStarted,
         tokenSetAllowanceSuccess,
-        tokenSetAllowanceFailed
+        tokenSetAllowanceFailed,
+        tokenSetAllowanceCancelled,
+        "token allowance"
+      ),
+      ethHelper
+    );
+
+    yield takeEvery(
+      TOKEN_FAUCET_REQUESTED,
+      createTokenSetWithTxSaga(
+        tokenAddress => ethHelper.callTokenFaucet(tokenAddress, address),
+        tokenFaucetStarted,
+        tokenFaucetSuccess,
+        tokenFaucetFailed,
+        tokenFaucetCancelled,
+        "token faucet call"
       ),
       ethHelper
     );
@@ -145,23 +167,32 @@ function* tokenUpdatesSaga(ethHelper) {
   }
 }
 
-function createSetAllowanceSaga(
-  allowanceSetter,
-  allowanceSettingStartedActionCreator,
-  allowanceSettingSuccessActionCreator,
-  allowanceSettingErrorActionCreator
+function createTokenSetWithTxSaga(
+  setter,
+  startedActionCreator,
+  successActionCreator,
+  errorActionCreator,
+  cancelledActionCreator,
+  title
 ) {
   return function*(ethHelper, action) {
     try {
-      yield put(allowanceSettingStartedActionCreator(action.address));
+      yield put(startedActionCreator(action.address));
 
-      const tx = yield call(allowanceSetter, action.address);
+      const tx = yield call(setter, action.address);
       yield call(() => ethHelper.waitForTxMinned(tx));
+      yield delay(500);
 
-      yield put(allowanceSettingSuccessActionCreator(action.address));
+      yield put(successActionCreator(action.address));
     } catch (e) {
-      console.error("Error setting allowance", e);
-      yield put(allowanceSettingErrorActionCreator(action.address, e));
+      if (e.code === SIGNATURE_CANCELLED_BY_USER) {
+        console.log(title + " cancelled");
+        yield put(cancelledActionCreator(action.address));
+        return;
+      }
+
+      console.error("Error setting " + title, e);
+      yield put(errorActionCreator(action.address, e));
     }
   };
 }

@@ -12,8 +12,7 @@ import {
 import * as _ from "lodash";
 import { updateWhileConnected } from "./node";
 import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
-
-const SIGNATURE_CANCELLED_BY_USER = -32603;
+import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 
 export function* updateOrdersSaga() {
   try {

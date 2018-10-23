@@ -3,9 +3,9 @@ import _ from "lodash";
 import { ContractWrappers } from "@0xproject/contract-wrappers";
 import ERC20Artifact from "@0xproject/contract-wrappers/lib/src/artifacts/ERC20Token";
 import {
+  assetDataUtils,
   orderHashUtils,
   signatureUtils,
-  assetDataUtils,
   SignerType
 } from "@0xproject/order-utils";
 import { BigNumber } from "@0xproject/utils";
@@ -346,6 +346,28 @@ export class EthHelper {
     );
   }
 
+  async callTokenFaucet(tokenAddress, address) {
+    const token = new ethers.Contract(
+      tokenAddress,
+      [
+        {
+          constant: false,
+          inputs: [],
+          name: "faucet",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function"
+        }
+      ],
+      this._ethersProvider.getSigner(address)
+    );
+
+    const transaction = await token.faucet();
+
+    return transaction.hash;
+  }
+
   async _getTokenAllowance(tokenAddress, tokensOwner, approvedAddress) {
     const token = new ethers.Contract(
       tokenAddress,
@@ -358,3 +380,5 @@ export class EthHelper {
       .then(v => new BigNumber(v));
   }
 }
+
+export const SIGNATURE_CANCELLED_BY_USER = -32603;

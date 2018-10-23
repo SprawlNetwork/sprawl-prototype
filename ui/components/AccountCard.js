@@ -9,12 +9,14 @@ export default class AccountCard extends PureComponent {
       balance,
       withAllowance,
       allowance,
-      waitingAllowance
+      waitingAllowance,
+      hasFaucet,
+      waitingForFaucet
     } = this.props;
     const title = this.props.title || symbol;
 
     return (
-      <div className="card">
+      <div className="card account-card">
         <div className="card-body">
           <h5 className="card-title">{title}</h5>
           <div className="card-text">
@@ -44,6 +46,19 @@ export default class AccountCard extends PureComponent {
               )}
             </>
           )}
+          {hasFaucet && (
+            <div>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={this.onFaucetClicked}
+                disabled={waitingForFaucet}
+              >
+                {waitingForFaucet
+                  ? "Getting free " + symbol + "..."
+                  : "Get free " + symbol}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -69,5 +84,10 @@ export default class AccountCard extends PureComponent {
   onAllowanceClicked = e => {
     e.preventDefault();
     this.props.giveAllowance();
+  };
+
+  onFaucetClicked = e => {
+    e.preventDefault();
+    this.props.callFaucet();
   };
 }

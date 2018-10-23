@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 
 import AccountCard from "../components/AccountCard";
 import Faucet from "../components/Faucet";
-import { tokenSetAllowanceRequest } from "../actions";
+import { tokenFaucetRequested, tokenSetAllowanceRequest } from "../actions";
 
 class Accounts extends PureComponent {
   render() {
@@ -50,9 +50,14 @@ class Accounts extends PureComponent {
                 withAllowance={true}
                 allowance={t.allowance}
                 waitingAllowance={t.waitingForAllowance}
-                giveAllowance={() => {
-                  this.props.dispatch(tokenSetAllowanceRequest(t.address));
-                }}
+                hasFaucet={t.hasFaucet}
+                waitingForFaucet={t.waitingForFaucet}
+                giveAllowance={() =>
+                  this.props.dispatch(tokenSetAllowanceRequest(t.address))
+                }
+                callFaucet={() =>
+                  this.props.dispatch(tokenFaucetRequested(t.address))
+                }
               />
             ))}
           </div>

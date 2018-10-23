@@ -66,6 +66,14 @@ export default class Order extends PureComponent {
       return "Taken by other";
     }
 
+    if (order.localTaker) {
+      if (order.localTaker === localAddress) {
+        return "Taking...";
+      }
+
+      return "Taking by other...";
+    }
+
     if (this._isExpired()) {
       return "Expired";
     }

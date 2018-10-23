@@ -73,6 +73,10 @@ export default class Dex {
       signedTakeOrderTransaction
     );
 
+    localOrder.localTaker = signedTakeOrderTransaction.takerAddress;
+
+    this._broadcastToClients(orderUpdated(localOrder));
+
     if (this._isOwnOrder(localOrder)) {
       this._takeOwnOrder(localOrder, signedTakeOrderTransaction);
     }
@@ -94,11 +98,16 @@ export default class Dex {
     this._setTakeMessageAsReceived(order.id, signedTakeOrderTransaction);
 
     const localOrder = this._orders.get(order.id);
+
+    localOrder.localTaker = undefined;
+
     this._broadcastToPeers(
       "orderTaken",
       localOrder,
       signedTakeOrderTransaction
     );
+
+    this._broadcastToClients(orderUpdated(localOrder));
 
     if (this._isOwnOrder(localOrder)) {
       this._takeOwnOrder(localOrder, signedTakeOrderTransaction);

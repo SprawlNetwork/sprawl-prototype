@@ -1,12 +1,12 @@
 import React from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
-export default function AllowanceError(props) {
+export default function FaucetError(props) {
   return (
     <Modal isOpen={props.isOpen} toggle={props.dismiss}>
-      <ModalHeader toggle={props.dismiss}>Error setting allowance</ModalHeader>
+      <ModalHeader toggle={props.dismiss}>Error calling faucet</ModalHeader>
       <ModalBody>
-        An error occurred while setting the allowance.
+        An error occurred while calling the faucet
         <br />
         Please check your ETH balance and connection and try again.
       </ModalBody>

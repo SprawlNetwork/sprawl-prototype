@@ -158,11 +158,19 @@ function* connectToNode(ethHelper, dispatch, { nodeAddress: node }) {
       // ROPSTEN
 
       tokens.push({
-        name: "Wrapped ETH",
-        symbol: "WETH",
-        address: "0xc778417e063141139fce010982780140aa0cd5ab",
+        name: "Wrapped ABC",
+        symbol: "ABC",
+        address: "0xd34273a6f91bb6ed91a456e1aa1445faf2d670b5",
         decimals: 18,
-        hasFaucet: false
+        hasFaucet: true
+      });
+
+      tokens.push({
+        name: "Wrapped XYZ",
+        symbol: "XYZ",
+        address: "0x97755f163d306309f25643a0f1dc13227b1a9e1b",
+        decimals: 18,
+        hasFaucet: true
       });
     } else {
       console.error("Sprawl is not working on network yet", networkId);

@@ -10,7 +10,8 @@ import {
   nodeAddressChanged,
   connectionToNodeRequested,
   takeOrderRequest,
-  tokenSetAllowanceErrorDismiss
+  tokenSetAllowanceErrorDismiss,
+  tokenFaucetErrorDismiss
 } from "../actions";
 import Notifications from "./Notifications";
 import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
@@ -28,6 +29,7 @@ import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
 import AllowanceError from "../components/AllowanceError";
 import LoadingMessage from "../components/LoadingMessage";
 import { connectSelectors } from "../redux";
+import FaucetError from "../components/FaucetError";
 
 class App extends Component {
   onConnect = nodeAddress => {
@@ -115,6 +117,18 @@ class App extends Component {
             }
           />
         ))}
+
+        {Object.values(this.props.tokens)
+          .filter(t => t.hasFaucet)
+          .map(t => (
+            <FaucetError
+              key={t.address}
+              isOpen={t.faucetError !== undefined}
+              dismiss={() =>
+                this.props.dispatch(tokenFaucetErrorDismiss(t.address))
+              }
+            />
+          ))}
       </>
     );
   }
