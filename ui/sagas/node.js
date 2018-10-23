@@ -56,7 +56,7 @@ function* checkConnectionStatusSaga() {
     }
 
     // eslint-disable-next-line redux-saga/no-unhandled-errors
-    yield delay(10000);
+    yield call(delay, 10000);
   }
 }
 
@@ -73,7 +73,7 @@ export function* updateWhileConnected(updater, interval = 1000, ...args) {
     }
 
     // eslint-disable-next-line redux-saga/no-unhandled-errors
-    yield delay(interval);
+    yield call(delay, interval);
   }
 }
 
@@ -96,7 +96,7 @@ function* updateRemoteAccountBalanceSaga(ethHelper) {
     }
 
     // eslint-disable-next-line redux-saga/no-unhandled-errors
-    yield delay(5000);
+    yield call(delay, 5000);
   }
 }
 

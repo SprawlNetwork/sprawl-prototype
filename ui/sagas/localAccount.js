@@ -80,7 +80,7 @@ function* updateValue(
     }
 
     // eslint-disable-next-line redux-saga/no-unhandled-errors
-    yield delay(interval);
+    yield call(delay, interval);
   }
 }
 
