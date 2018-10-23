@@ -87,3 +87,19 @@ a:hover {
   display: block;
   width: 10em;
 }
+
+.error-boundary .error-info {
+  width: 40rem;
+  text-align: left;
+  margin: 3rem auto;
+}
+
+.error-boundary .error-info pre {
+  width: 39rem;
+  max-height: 15rem;
+  margin: auto;
+  background: #fafafa;
+  border: 1px solid #999;
+  border-radius: 0.2em;
+  padding: 1rem;
+}

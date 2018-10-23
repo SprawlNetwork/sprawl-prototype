@@ -41,6 +41,7 @@ import {
   TOKEN_SET_ALLOWANCE_CANCELLED
 } from "./actions";
 import { fromEntries } from "../common/utils";
+import { ROOT_SAGA_ERROR } from "./actions/sagas";
 
 function tokens(state = {}, action) {
   switch (action.type) {
@@ -327,6 +328,16 @@ function metamask(state = { loading: true }, action) {
   }
 }
 
+function rootSagaError(state = null, action) {
+  switch (action.type) {
+    case ROOT_SAGA_ERROR:
+      return action.error;
+
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   nodeConnection,
   networks,
@@ -337,7 +348,8 @@ const rootReducer = combineReducers({
   notifications,
   errors,
   metamask,
-  tokens
+  tokens,
+  rootSagaError
 });
 
 export default rootReducer;

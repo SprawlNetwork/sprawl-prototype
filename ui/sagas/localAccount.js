@@ -4,7 +4,8 @@ import {
   all,
   call,
   takeLatest,
-  takeEvery
+  takeEvery,
+  race
 } from "redux-saga/effects";
 import { delay } from "redux-saga";
 import {
@@ -51,7 +52,15 @@ function* updateValue(
   while (true) {
     try {
       const current = yield select(currentValueSelector);
-      const updated = yield call(updatedValueGetter);
+
+      const { updated, timeout } = yield race({
+        updated: call(updatedValueGetter),
+        timeout: call(delay, 3000, true)
+      });
+
+      if (timeout) {
+        throw new Error("Update " + title + " timeout");
+      }
 
       // Sometimes the message about unlocking metamask is always shown.
       // This is here to help debug that, as it's not reproducible
@@ -84,87 +93,80 @@ const updateLocalAccountAddressSaga = ethHelper =>
   );
 
 function* localAccountActionsAndUpdatesSaga(ethHelper, { address }) {
-  try {
-    yield takeEvery(MAKE_ORDER_REQUEST, makeOrderSaga, ethHelper, address);
-    yield takeEvery(TAKE_ORDER_REQUEST, takeOrderSaga, ethHelper, address);
+  yield takeEvery(MAKE_ORDER_REQUEST, makeOrderSaga, ethHelper, address);
+  yield takeEvery(TAKE_ORDER_REQUEST, takeOrderSaga, ethHelper, address);
 
-    yield call(
-      updateValue,
-      state => state.localAccount.ethBalance,
-      () => ethHelper.getEthBalance(address),
-      localAccountEthBalanceUpdated,
-      "ETH balance of " + address,
-      UPDATES_INTERVAL
-    );
-  } catch (error) {
-    console.error(
-      "Error updating local account " + address + " balances and allowances",
-      error
-    );
-  }
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  yield call(
+    updateValue,
+    state => state.localAccount.ethBalance,
+    () => ethHelper.getEthBalance(address),
+    localAccountEthBalanceUpdated,
+    "ETH balance of " + address,
+    UPDATES_INTERVAL
+  );
 }
 
 function* tokenUpdatesSaga(ethHelper) {
-  try {
-    const address = yield select(state => state.localAccount.address);
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  const address = yield select(state => state.localAccount.address);
 
-    yield takeEvery(
-      TOKEN_SET_ALLOWANCE_REQUEST,
-      createTokenSetWithTxSaga(
-        tokenAddress =>
-          ethHelper.set0xProxyUnllimitedAllowance(tokenAddress, address),
-        tokenSetAllowanceStarted,
-        tokenSetAllowanceSuccess,
-        tokenSetAllowanceFailed,
-        tokenSetAllowanceCancelled,
-        "token allowance"
-      ),
-      ethHelper
+  yield takeEvery(
+    TOKEN_SET_ALLOWANCE_REQUEST,
+    createTokenSetWithTxSaga(
+      tokenAddress =>
+        ethHelper.set0xProxyUnllimitedAllowance(tokenAddress, address),
+      tokenSetAllowanceStarted,
+      tokenSetAllowanceSuccess,
+      tokenSetAllowanceFailed,
+      tokenSetAllowanceCancelled,
+      "token allowance"
+    ),
+    ethHelper
+  );
+
+  yield takeEvery(
+    TOKEN_FAUCET_REQUESTED,
+    createTokenSetWithTxSaga(
+      tokenAddress => ethHelper.callTokenFaucet(tokenAddress, address),
+      tokenFaucetStarted,
+      tokenFaucetSuccess,
+      tokenFaucetFailed,
+      tokenFaucetCancelled,
+      "token faucet call"
+    ),
+    ethHelper
+  );
+
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  const tokenAddresses = yield select(state => Object.keys(state.tokens));
+
+  const tasks = [];
+
+  for (const tokenAddress of tokenAddresses) {
+    tasks.push(
+      updateValue(
+        state => state.tokens[tokenAddress].balance,
+        () => ethHelper.getTokenBalance(tokenAddress, address),
+        newValue => tokenBalanceUpdated(tokenAddress, newValue),
+        "Token balance update of " + tokenAddress,
+        UPDATES_INTERVAL
+      )
     );
 
-    yield takeEvery(
-      TOKEN_FAUCET_REQUESTED,
-      createTokenSetWithTxSaga(
-        tokenAddress => ethHelper.callTokenFaucet(tokenAddress, address),
-        tokenFaucetStarted,
-        tokenFaucetSuccess,
-        tokenFaucetFailed,
-        tokenFaucetCancelled,
-        "token faucet call"
-      ),
-      ethHelper
+    tasks.push(
+      updateValue(
+        state => state.tokens[tokenAddress].allowance,
+        () => ethHelper.getToken0xProxyAllowance(tokenAddress, address),
+        newValue => tokenAllowanceUpdated(tokenAddress, newValue),
+        "Token allowance update of " + tokenAddress,
+        UPDATES_INTERVAL
+      )
     );
-
-    const tokenAddresses = yield select(state => Object.keys(state.tokens));
-
-    const tasks = [];
-
-    for (const tokenAddress of tokenAddresses) {
-      tasks.push(
-        updateValue(
-          state => state.tokens[tokenAddress].balance,
-          () => ethHelper.getTokenBalance(tokenAddress, address),
-          newValue => tokenBalanceUpdated(tokenAddress, newValue),
-          "Token balance update of " + tokenAddress,
-          UPDATES_INTERVAL
-        )
-      );
-
-      tasks.push(
-        updateValue(
-          state => state.tokens[tokenAddress].allowance,
-          () => ethHelper.getToken0xProxyAllowance(tokenAddress, address),
-          newValue => tokenAllowanceUpdated(tokenAddress, newValue),
-          "Token allowance update of " + tokenAddress,
-          UPDATES_INTERVAL
-        )
-      );
-    }
-
-    yield all(tasks);
-  } catch (error) {
-    console.error("Error updating tokens' values", error);
   }
+
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  yield all(tasks);
 }
 
 function createTokenSetWithTxSaga(
@@ -211,12 +213,9 @@ function* startUpdatingNewAccountsSaga(ethHelper) {
 }
 
 export function* localAccountSaga(ethHelper) {
-  try {
-    yield all([
-      startUpdatingNewAccountsSaga(ethHelper),
-      updateLocalAccountAddressSaga(ethHelper)
-    ]);
-  } catch (error) {
-    console.error("Error in local account saga", error);
-  }
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  yield all([
+    startUpdatingNewAccountsSaga(ethHelper),
+    updateLocalAccountAddressSaga(ethHelper)
+  ]);
 }

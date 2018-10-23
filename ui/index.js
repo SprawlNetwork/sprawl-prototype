@@ -16,6 +16,8 @@ import {
 } from "./actions";
 import { EthHelper } from "../common/eth";
 import * as ethers from "ethers";
+import ErrorsBoundary from "./containers/ErrorsBoundary";
+import { rootSagaError } from "./actions/sagas";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -40,14 +42,24 @@ window.addEventListener("load", () => {
     .getNetworkId()
     .then(id => store.dispatch(localNetworkIdChanged(id)));
 
-  sagaMiddleware.run(rootSaga, ethHelper, store.dispatch.bind(store));
+  const rootSagaTask = sagaMiddleware.run(
+    rootSaga,
+    ethHelper,
+    store.dispatch.bind(store)
+  );
+
+  rootSagaTask.done.catch(sagaError =>
+    store.dispatch(rootSagaError(sagaError.error))
+  );
 
   store.dispatch(metamaskLoaded());
 });
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <ErrorsBoundary>
+      <App />
+    </ErrorsBoundary>
   </Provider>,
   document.getElementById("root")
 );

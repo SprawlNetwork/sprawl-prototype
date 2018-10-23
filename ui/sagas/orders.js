@@ -15,28 +15,28 @@ import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 
 export function* updateOrdersSaga() {
-  try {
-    const node = yield select(nodeAddress);
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  const node = yield select(nodeAddress);
 
-    const remoteOrders = yield call(callNode, node, "getOrders");
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  const remoteOrders = yield call(callNode, node, "getOrders");
 
-    const currentOrders = yield select(state => state.orders);
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  const currentOrders = yield select(state => state.orders);
 
-    const remoteOrderIds = remoteOrders.map(o => o.id);
+  const remoteOrderIds = remoteOrders.map(o => o.id);
 
-    const deletedOrderIds = Object.values(currentOrders)
-      .filter(o => !remoteOrderIds.includes(o.id))
-      .map(o => o.id);
+  const deletedOrderIds = Object.values(currentOrders)
+    .filter(o => !remoteOrderIds.includes(o.id))
+    .map(o => o.id);
 
-    const updatedOrders = remoteOrders.filter(
-      o => !_.isEqual(o, currentOrders[o.id])
-    );
+  const updatedOrders = remoteOrders.filter(
+    o => !_.isEqual(o, currentOrders[o.id])
+  );
 
-    if (deletedOrderIds.length !== 0 || updatedOrders.length !== 0) {
-      yield put(ordersUpdated(updatedOrders, deletedOrderIds));
-    }
-  } catch (error) {
-    console.error("Error updating orders", error);
+  if (deletedOrderIds.length !== 0 || updatedOrders.length !== 0) {
+    // eslint-disable-next-line redux-saga/no-unhandled-errors
+    yield put(ordersUpdated(updatedOrders, deletedOrderIds));
   }
 }
 
@@ -104,9 +104,6 @@ export function* takeOrderSaga(ethHelper, localAddress, { order }) {
 }
 
 export function* periodicallyUpdateOrdersSaga() {
-  try {
-    yield call(updateWhileConnected, updateOrdersSaga, 5000);
-  } catch (error) {
-    console.error("Error updating orders periodically", error);
-  }
+  // eslint-disable-next-line redux-saga/no-unhandled-errors
+  yield call(updateWhileConnected, updateOrdersSaga, 5000);
 }
