@@ -4,7 +4,8 @@ import {
   decode,
   NEW_PEER,
   ORDER_UPDATED,
-  PEER_REMOVED
+  PEER_REMOVED,
+  NODE_LOG
 } from "../common/messages";
 import { newPeer, ordersUpdated, peerRemoved } from "./actions";
 
@@ -17,6 +18,12 @@ export default class WebsocketUpdater {
     this._wsUrl = "ws://" + nodeAddress + "/";
 
     this._ws = new ReconnectingWebsocket(this._wsUrl);
+
+    this._ws.onopen = () =>
+      console.log(
+        `%c[${new Date().toLocaleString()}] Connected to node ` + nodeAddress,
+        "font-weight: bold"
+      );
 
     this._ws.onerror = errorEvent => {
       console.warn("WebSocket error", errorEvent);
@@ -38,8 +45,6 @@ export default class WebsocketUpdater {
   }
 
   _onMessage(msg) {
-    console.log("Websocket message received", msg);
-
     switch (msg.type) {
       case NEW_PEER:
         return this._dispatch(newPeer(msg.peer));
@@ -50,8 +55,16 @@ export default class WebsocketUpdater {
       case ORDER_UPDATED:
         return this._dispatch(ordersUpdated([msg.order], []));
 
+      case NODE_LOG:
+        console.log(
+          `%c[${new Date().toLocaleString()}] Message from node: %c` + msg.log,
+          "font-weight: bold",
+          "font-weight: normal"
+        );
+        break;
+
       default:
-        console.warn("Unrecognized message type", msg.type);
+        console.warn("Unrecognized message", msg);
     }
   }
 }

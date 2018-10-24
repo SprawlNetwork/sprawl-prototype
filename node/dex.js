@@ -1,5 +1,10 @@
 import _ from "lodash";
-import { newPeer, orderUpdated, peerRemoved } from "../common/messages";
+import {
+  newPeer,
+  nodeLog,
+  orderUpdated,
+  peerRemoved
+} from "../common/messages";
 import { EthHelper } from "../common/eth";
 import * as ethers from "ethers";
 import { getEthereumRPCURL } from "./eth";
@@ -53,6 +58,10 @@ export default class Dex {
   }
 
   async sendOrder(order) {
+    this._broadcastToClients(
+      nodeLog(`Broadcasting order ${order.id} to the network`)
+    );
+
     return await this.receiveOrder(order);
   }
 
@@ -74,6 +83,8 @@ export default class Dex {
     );
 
     localOrder.localTaker = signedTakeOrderTransaction.takerAddress;
+
+    this._broadcastToClients(nodeLog(`Taking order: ${localOrder.id}`));
 
     this._broadcastToClients(orderUpdated(localOrder));
 
@@ -99,7 +110,15 @@ export default class Dex {
 
     const localOrder = this._orders.get(order.id);
 
-    localOrder.localTaker = undefined;
+    if (localOrder.localTaker) {
+      if (signedTakeOrderTransaction.takerAddress !== localOrder.localTaker) {
+        localOrder.localTaker = undefined;
+
+        this._broadcastToClients(
+          nodeLog(`Order taken message received for order: ${order.id}`)
+        );
+      }
+    }
 
     this._broadcastToPeers(
       "orderTaken",
@@ -135,6 +154,12 @@ fillingTx: ${order.fillingTx}
     localOrder.filled = order.filled;
     localOrder.fillingError = order.fillingError;
     localOrder.fillingTx = order.fillingTx;
+
+    if (!this._isOwnOrder(order)) {
+      this._broadcastToClients(
+        nodeLog(`Status updated for remote order: ${order.id}`)
+      );
+    }
 
     this._broadcastToClients(orderUpdated(localOrder));
   }
@@ -184,6 +209,9 @@ fillingTx: ${order.fillingTx}
       .catch(error => console.error("Error adding new peer", error))
       .then(() => {
         this._broadcastToClients(newPeer(`${peer.ip}:${peer.port}`));
+        this._broadcastToClients(
+          nodeLog(`New peer discovered: ${peer.ip}:${peer.port}`)
+        );
       });
   }
 
@@ -203,12 +231,15 @@ fillingTx: ${order.fillingTx}
         .map(o => o.id);
 
       orderIdsToRemove.forEach(id => this._orders.delete(id));
+    }
 
-      try {
-        this._broadcastToClients(peerRemoved(`${peer.ip}:${peer.port}`));
-      } catch (error) {
-        console.error("Error removing peer", error);
-      }
+    try {
+      this._broadcastToClients(peerRemoved(`${peer.ip}:${peer.port}`));
+      this._broadcastToClients(
+        nodeLog(`Lost connection to peer ${peer.ip}:${peer.port}`)
+      );
+    } catch (error) {
+      console.error("Error removing peer", error);
     }
   }
 
@@ -240,14 +271,24 @@ fillingTx: ${order.fillingTx}
 
     if (!order.filling) {
       try {
+        this._broadcastToClients(nodeLog(`Filling order: ${order.id}`));
+
         const tx = await this._ethHelper.takeOrder(
           this._wallet.address,
           order.signedTakeOrderTransaction
         );
 
+        this._broadcastToClients(
+          nodeLog(`Status updated for local order: ${order.id}`)
+        );
+
         order.filling = true;
         order.fillingTx = tx;
       } catch (error) {
+        this._broadcastToClients(
+          nodeLog(`Error filling for local order: ${order.id}`)
+        );
+
         console.error("Error sending take transaction", order.id, error);
         order.fillingError = error.toString();
         order.filling = false;
@@ -257,10 +298,18 @@ fillingTx: ${order.fillingTx}
         const receipt = await this._ethHelper.waitForTxMinned(order.fillingTx);
 
         if (receipt.status === 0) {
+          this._broadcastToClients(
+            nodeLog(`Error filling for local order: ${order.id}`)
+          );
+
           console.error("Take transaction failed", order.id);
           order.fillingError = "Take transaction failed";
           order.filling = false;
         } else {
+          this._broadcastToClients(
+            nodeLog(`Status updated for local order: ${order.id}`)
+          );
+
           console.log("Order taken :)", order.id);
           console.log(
             "Is order fully filled?",
@@ -270,6 +319,10 @@ fillingTx: ${order.fillingTx}
           order.filling = false;
         }
       } catch (error) {
+        this._broadcastToClients(
+          nodeLog(`Error filling for local order: ${order.id}`)
+        );
+
         console.error("Error waiting for take transaction", order.id, error);
         order.fillingError = error.toString();
         order.filling = false;
@@ -314,6 +367,10 @@ fillingTx: ${order.fillingTx}
   _addOrder(order) {
     order.receptionDate = new Date();
     this._orders.set(order.id, order);
+
+    if (!this._isOwnOrder(order)) {
+      this._broadcastToClients(nodeLog(`New order received: ${order.id}`));
+    }
   }
 
   _broadcastToPeers(funcName, ...params) {

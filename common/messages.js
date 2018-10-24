@@ -22,3 +22,10 @@ export const orderUpdated = order => ({
   type: ORDER_UPDATED,
   order
 });
+
+export const NODE_LOG = "NODE_LOG";
+
+export const nodeLog = log => ({
+  type: NODE_LOG,
+  log
+});
