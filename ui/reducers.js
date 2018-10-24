@@ -3,8 +3,7 @@ import * as _ from "lodash";
 
 import { BigNumber } from "@0xproject/utils";
 
-const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
-
+import { fromEntries } from "../common/utils";
 import {
   CONNECTION_ERROR_CHANGED,
   LOCAL_ACCOUNT_ADDRESS_CHANGED,
@@ -40,8 +39,10 @@ import {
   TOKEN_FAUCET_CANCELLED,
   TOKEN_SET_ALLOWANCE_CANCELLED
 } from "./actions";
-import { fromEntries } from "../common/utils";
+
 import { ROOT_SAGA_ERROR } from "./actions/sagas";
+
+const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 
 function tokens(state = {}, action) {
   switch (action.type) {

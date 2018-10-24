@@ -1,13 +1,4 @@
-import {
-  all,
-  apply,
-  call,
-  cancelled,
-  put,
-  select,
-  takeLatest,
-  takeEvery
-} from "redux-saga/effects";
+import { delay } from "redux-saga";
 import {
   nodeAddress,
   remoteAccountAddress,
@@ -27,9 +18,18 @@ import {
   remoteNetworkIdChanged,
   tokenAdded
 } from "../actions";
-import { delay } from "redux-saga";
-import { periodicallyUpdateOrdersSaga, updateOrdersSaga } from "./orders";
 import { WebsocketUpdater } from "../WebsocketUpdater";
+import { periodicallyUpdateOrdersSaga, updateOrdersSaga } from "./orders";
+import {
+  all,
+  apply,
+  call,
+  cancelled,
+  put,
+  select,
+  takeLatest,
+  takeEvery
+} from "redux-saga/effects";
 
 function* checkConnectionStatusSaga() {
   while (true) {

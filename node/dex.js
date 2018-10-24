@@ -1,4 +1,5 @@
 import _ from "lodash";
+import * as ethers from "ethers";
 import {
   newPeer,
   nodeLog,
@@ -6,7 +7,6 @@ import {
   peerRemoved
 } from "../common/messages";
 import { EthHelper } from "../common/eth";
-import * as ethers from "ethers";
 import { getEthereumRPCURL } from "./eth";
 
 export class Dex {

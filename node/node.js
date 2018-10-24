@@ -1,9 +1,9 @@
-import * as network from "./network";
 import chalk from "chalk";
+import { encode } from "../common/messages";
+import * as network from "./network";
 import { getNetworkId } from "./eth";
 import { loadOrCreateWallet } from "./wallet";
-import { encode } from "../common/messages";
-import { Dex } from "./Dex";
+import { Dex } from "./dex";
 import { PeerManager } from "./peers";
 import { RPCServer } from "./rpc";
 

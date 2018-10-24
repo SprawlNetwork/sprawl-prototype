@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
-import { makeOrderFailureDismiss, makeOrderFailure } from "../actions/index";
 import { BigNumber } from "@0xproject/utils";
+import { makeOrderFailureDismiss, makeOrderFailure } from "../actions/index";
 
 class MakeOrderComponent extends PureComponent {
   onSubmit = e => {

@@ -1,16 +1,15 @@
-import { serialize, unserialize } from "../common/serialization";
-
+import util from "util";
+import http from "http";
 import WebSocket from "ws";
 import enableDestroy from "server-destroy";
-import util from "util";
 import jayson from "jayson";
 import cors from "cors";
 import connect from "connect";
 import { json as jsonParser } from "body-parser";
-import http from "http";
 import errorhandler from "errorhandler";
 import morgan from "morgan";
 import chalk from "chalk";
+import { serialize, unserialize } from "../common/serialization";
 
 export class RPCServer {
   async start(port, methodsObject) {

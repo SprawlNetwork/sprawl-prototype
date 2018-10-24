@@ -13,7 +13,16 @@
         "caughtErrorsIgnorePattern": "^_",
         "varsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "import/no-unresolved": "error",
+    "import/no-default-export": "error",
+    "import/named": "error",
+    "import/export": "error",
+    "import/no-mutable-exports": "error",
+    "import/first": "error",
+    "import/no-duplicates": "error",
+    "import/newline-after-import": "warn",
+    "import/order": "warn"
   },
   "parser": "babel-eslint",
   "parserOptions": {
@@ -21,5 +30,5 @@
     "allowImportExportEverywhere": false,
     "codeFrame": true
   },
-  "plugins": ["babel"]
+  "plugins": ["babel", "import"]
 }

@@ -1,6 +1,5 @@
-import { PureComponent } from "react";
+import React, { PureComponent } from "react";
 import { connectSelectors } from "../utils";
-import React from "react";
 
 class ErrorsBoundaryComponent extends PureComponent {
   constructor(props) {

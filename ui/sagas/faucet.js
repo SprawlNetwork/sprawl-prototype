@@ -1,8 +1,8 @@
-import { call, put, select, takeEvery } from "redux-saga/effects";
 import { FAUCET_CALL_REQUESTED } from "../actions/faucet";
 import { localAccountAddress, nodeAddress } from "../selectors";
 import { callNode } from "../rpc";
 import { notificationReceived } from "../actions";
+import { call, put, select, takeEvery } from "redux-saga/effects";
 
 function* callFaucet() {
   try {

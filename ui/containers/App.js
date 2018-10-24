@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 
 import { GlobalError } from "../components/GlobalError";
-import { MakeOrder } from "./MakeOrder";
-import { NodeInfo } from "./NodeInfo";
-import { Accounts } from "./Accounts";
-import { Orders } from "./Orders";
 import {
   makeOrderRequest,
   nodeAddressChanged,
@@ -13,7 +9,6 @@ import {
   tokenSetAllowanceErrorDismiss,
   tokenFaucetErrorDismiss
 } from "../actions";
-import { Notifications } from "./Notifications";
 import { UnlockMetaMaskMessage } from "../components/UnlockMetaMaskMessage";
 import {
   connectedToNode,
@@ -30,6 +25,11 @@ import { AllowanceError } from "../components/AllowanceError";
 import { LoadingMessage } from "../components/LoadingMessage";
 import { connectSelectors } from "../utils";
 import { FaucetError } from "../components/FaucetError";
+import { Notifications } from "./Notifications";
+import { Orders } from "./Orders";
+import { Accounts } from "./Accounts";
+import { NodeInfo } from "./NodeInfo";
+import { MakeOrder } from "./MakeOrder";
 
 class AppComponent extends Component {
   onConnect = nodeAddress => {

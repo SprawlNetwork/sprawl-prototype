@@ -1,6 +1,6 @@
-import { faucetCallRequested } from "../actions/faucet";
 import React from "react";
 import { connect } from "react-redux";
+import { faucetCallRequested } from "../actions/faucet";
 import { isLocalNetwork } from "../selectors";
 
 function FaucetComponent({ isLocalNetwork, dispatch }) {

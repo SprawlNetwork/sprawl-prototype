@@ -1,12 +1,3 @@
-import {
-  put,
-  select,
-  all,
-  call,
-  takeLatest,
-  takeEvery,
-  race
-} from "redux-saga/effects";
 import { delay } from "redux-saga";
 import {
   LOCAL_ACCOUNT_ADDRESS_CHANGED,
@@ -29,9 +20,18 @@ import {
   tokenSetAllowanceSuccess
 } from "../actions";
 import { localAccountAddress } from "../selectors";
-import { makeOrderSaga, takeOrderSaga } from "./orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 import { callMethod } from "../utils";
+import { makeOrderSaga, takeOrderSaga } from "./orders";
+import {
+  put,
+  select,
+  all,
+  call,
+  takeLatest,
+  takeEvery,
+  race
+} from "redux-saga/effects";
 
 const UPDATES_INTERVAL = 3000;
 

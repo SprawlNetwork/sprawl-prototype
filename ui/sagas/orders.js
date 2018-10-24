@@ -1,4 +1,4 @@
-import { call, put, select } from "redux-saga/effects";
+import * as _ from "lodash";
 import { nodeAddress } from "../selectors";
 import { callNode } from "../rpc";
 import {
@@ -9,11 +9,11 @@ import {
   takeOrderStarted,
   takeOrderSuccess
 } from "../actions";
-import * as _ from "lodash";
-import { updateWhileConnected } from "./node";
 import { getSprawlOrderFrom0xSignedOrder } from "../../common/orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 import { callMethod } from "../utils";
+import { updateWhileConnected } from "./node";
+import { call, put, select } from "redux-saga/effects";
 
 export function* updateOrdersSaga() {
   // eslint-disable-next-line redux-saga/no-unhandled-errors

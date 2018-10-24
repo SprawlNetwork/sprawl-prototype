@@ -1,10 +1,10 @@
+import { delay } from "redux-saga";
 import {
   NOTIFICATION_RECEIVED,
   notificationAdded,
   notificationExpired
 } from "../actions";
 import { call, put, takeEvery } from "redux-saga/effects";
-import { delay } from "redux-saga";
 
 function* notificationReceived({ msg }) {
   try {

@@ -1,11 +1,11 @@
 /*eslint-env node*/
 
-const webpack = require("webpack");
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 
-const isDevServer =
+const _isDevServer =
   path.basename(require.main.filename) === "webpack-dev-server.js";
 
 module.exports = {

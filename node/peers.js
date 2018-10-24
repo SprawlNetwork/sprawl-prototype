@@ -1,8 +1,8 @@
 const EventEmitter = require("events");
-const { RPCClient } = require("./rpc");
 const net = require("net");
 const Bonjour = require("bonjour");
 const _ = require("lodash");
+const { RPCClient } = require("./rpc");
 const network = require("./network");
 
 const KEEP_ALIVE_INTERVAL = 2000;

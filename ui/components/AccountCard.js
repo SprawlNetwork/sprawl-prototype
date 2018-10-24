@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
-import { Amount } from "./Amount";
 import { allowanceIsBigEnough } from "../selectors";
+import { Amount } from "./Amount";
 
 export class AccountCard extends PureComponent {
   render() {

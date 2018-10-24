@@ -7,9 +7,9 @@ import { Web3Wrapper } from "@0xproject/web3-wrapper";
 import { BigNumber } from "@0xproject/utils";
 import { ContractWrappers } from "@0xproject/contract-wrappers";
 
+import * as ethers from "ethers";
 import packageJson from "../package.json";
 import { EthHelper } from "../common/eth";
-import * as ethers from "ethers";
 import { getSprawlOrderFrom0xSignedOrder } from "../common/orders";
 
 const config = {
