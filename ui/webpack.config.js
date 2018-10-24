@@ -8,8 +8,6 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const isDevServer =
   path.basename(require.main.filename) === "webpack-dev-server.js";
 
-console.log(isDevServer)
-
 module.exports = {
   entry: {
     app: "./index.js"
@@ -37,7 +35,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new webpack.DefinePlugin({
-      ENABLE_REDUX_LOGS: isDevServer
+      ENABLE_REDUX_LOGS: false
     }),
     new HtmlWebpackPlugin({
       title: "Sprawl",
