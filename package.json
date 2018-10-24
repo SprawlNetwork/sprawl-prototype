@@ -1,7 +1,9 @@
 {
   "name": "sprawl-prototype",
   "version": "1.0.0",
-  "main": "index.js",
+  "author": "Sprawl Network",
+  "repository": "github:SprawlNetwork/sprawl-prototype",
+  "license": "MIT",
   "scripts": {
     "prettier": "prettier --write '{node,ui,common}/**/*.js'",
     "eslint": "eslint '{node,ui,common}/**/*.js'",
