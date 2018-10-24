@@ -3,7 +3,7 @@
 Requirements:
 
 * node.js 8+
-* MetaMask
+* MetaMask with Ropsten ETH (you can get some [here](https://faucet.metamask.io))
 
 How to install it:
 
@@ -23,3 +23,5 @@ How to run the UI:
 1. Open a terminal in the repo
 1. `npm run ui`
 1. Open [http://localhost:8080/](http://localhost:8080/) in your browser
+1. Connect to your node
+1. Note the node's ETH address and send it Ropsten ETH
