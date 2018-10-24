@@ -28,7 +28,7 @@ import {
   tokenSetAllowanceStarted,
   tokenSetAllowanceSuccess
 } from "../actions";
-import { localAccountAddress, metaMaskUnlocked } from "../selectors";
+import { localAccountAddress } from "../selectors";
 import { makeOrderSaga, takeOrderSaga } from "./orders";
 import { SIGNATURE_CANCELLED_BY_USER } from "../../common/eth";
 import { callMethod } from "../utils";
