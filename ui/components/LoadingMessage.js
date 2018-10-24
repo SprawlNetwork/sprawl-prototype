@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function LoadingMessage() {
+export function LoadingMessage() {
   return (
     <div className="overlay-message">
       <div>

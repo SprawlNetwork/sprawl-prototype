@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { CSSTransitionGroup } from "react-transition-group";
 
-import Notification from "./Notification";
+import { Notification } from "./Notification";
 
-class Notifications extends Component {
+class NotificationsComponent extends Component {
   render() {
     return (
       <div className="notificationsContainer d-none d-md-block">
@@ -26,4 +26,4 @@ const mapStateToProps = ({ notifications }) => ({
   notifications
 });
 
-export default connect(mapStateToProps)(Notifications);
+export const Notifications = connect(mapStateToProps)(NotificationsComponent);

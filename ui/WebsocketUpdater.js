@@ -9,7 +9,7 @@ import {
 } from "../common/messages";
 import { newPeer, ordersUpdated, peerRemoved } from "./actions";
 
-export default class WebsocketUpdater {
+export class WebsocketUpdater {
   constructor(actionsDispatcher) {
     this._actionsDispatcher = actionsDispatcher;
   }

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 
 import { notificationDismissed } from "../actions/notifications";
 
-class Notification extends PureComponent {
+class NotificationComponent extends PureComponent {
   dismiss = () => this.props.dispatch(notificationDismissed(this.props.id));
 
   render() {
@@ -27,4 +27,4 @@ class Notification extends PureComponent {
   }
 }
 
-export default connect()(Notification);
+export const Notification = connect()(NotificationComponent);

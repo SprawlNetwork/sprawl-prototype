@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 import { connectedToNode, nodeAddress } from "../selectors";
 
-class NodeInfo extends PureComponent {
+class NodeInfoComponent extends PureComponent {
   constructor(props) {
     super(props);
     this.state = { newAddress: props.nodeAddress };
@@ -59,4 +59,4 @@ const mapStateToProps = (state, { onConnect }) => ({
   connectedToNode: connectedToNode(state)
 });
 
-export default connect(mapStateToProps)(NodeInfo);
+export const NodeInfo = connect(mapStateToProps)(NodeInfoComponent);

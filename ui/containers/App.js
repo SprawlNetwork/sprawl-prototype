@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 
-import GlobalError from "../components/GlobalError";
-import MakeOrder from "./MakeOrder";
-import NodeInfo from "./NodeInfo";
-import Accounts from "./Accounts";
-import Orders from "./Orders";
+import { GlobalError } from "../components/GlobalError";
+import { MakeOrder } from "./MakeOrder";
+import { NodeInfo } from "./NodeInfo";
+import { Accounts } from "./Accounts";
+import { Orders } from "./Orders";
 import {
   makeOrderRequest,
   nodeAddressChanged,
@@ -13,8 +13,8 @@ import {
   tokenSetAllowanceErrorDismiss,
   tokenFaucetErrorDismiss
 } from "../actions";
-import Notifications from "./Notifications";
-import UnlockMetaMaskMessage from "../components/UnlockMetaMaskMessage";
+import { Notifications } from "./Notifications";
+import { UnlockMetaMaskMessage } from "../components/UnlockMetaMaskMessage";
 import {
   connectedToNode,
   couldNotConnectToNode,
@@ -25,13 +25,13 @@ import {
   nodeAddress,
   remoteNetworkId
 } from "../selectors";
-import ChangeMetaMaskNetwork from "../components/ChangeMetaMaskNetwork";
-import AllowanceError from "../components/AllowanceError";
-import LoadingMessage from "../components/LoadingMessage";
+import { ChangeMetaMaskNetwork } from "../components/ChangeMetaMaskNetwork";
+import { AllowanceError } from "../components/AllowanceError";
+import { LoadingMessage } from "../components/LoadingMessage";
 import { connectSelectors } from "../utils";
-import FaucetError from "../components/FaucetError";
+import { FaucetError } from "../components/FaucetError";
 
-class App extends Component {
+class AppComponent extends Component {
   onConnect = nodeAddress => {
     if (this.props.nodeAddress !== nodeAddress || !this.props.connectedToNode) {
       this.props.dispatch(nodeAddressChanged(nodeAddress));
@@ -134,7 +134,7 @@ class App extends Component {
   }
 }
 
-export default connectSelectors({
+export const App = connectSelectors({
   nodeAddress,
   metaMaskUnlocked,
   metaMaskInWrongNetwork,
@@ -144,4 +144,4 @@ export default connectSelectors({
   remoteNetworkId,
   isMetaMaskLoading,
   tokens: state => state.tokens
-})(App);
+})(AppComponent);

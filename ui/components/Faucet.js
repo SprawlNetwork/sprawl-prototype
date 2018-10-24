@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { isLocalNetwork } from "../selectors";
 
-function Faucet({ isLocalNetwork, dispatch }) {
+function FaucetComponent({ isLocalNetwork, dispatch }) {
   if (!isLocalNetwork) {
     return null;
   }
@@ -22,4 +22,4 @@ function Faucet({ isLocalNetwork, dispatch }) {
 
 const mapStateToProps = state => ({ isLocalNetwork: isLocalNetwork(state) });
 
-export default connect(mapStateToProps)(Faucet);
+export const Faucet = connect(mapStateToProps)(FaucetComponent);

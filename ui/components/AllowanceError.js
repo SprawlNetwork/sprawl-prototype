@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
-export default function AllowanceError(props) {
+export function AllowanceError(props) {
   return (
     <Modal isOpen={props.isOpen} toggle={props.dismiss}>
       <ModalHeader toggle={props.dismiss}>Error setting allowance</ModalHeader>

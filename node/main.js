@@ -1,4 +1,4 @@
-import Node from "./Node";
+import { Node } from "./Node";
 
 async function main() {
   const node = new Node();

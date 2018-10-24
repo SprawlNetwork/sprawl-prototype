@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import { Amount } from "./Amount";
 import { allowanceIsBigEnough } from "../selectors";
 
-export default class AccountCard extends PureComponent {
+export class AccountCard extends PureComponent {
   render() {
     const {
       symbol,

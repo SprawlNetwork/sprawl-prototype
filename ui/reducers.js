@@ -337,7 +337,7 @@ function rootSagaError(state = null, action) {
   }
 }
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
   nodeConnection,
   networks,
   localAccount,
@@ -350,5 +350,3 @@ const rootReducer = combineReducers({
   tokens,
   rootSagaError
 });
-
-export default rootReducer;

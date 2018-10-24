@@ -29,7 +29,7 @@ import {
 } from "../actions";
 import { delay } from "redux-saga";
 import { periodicallyUpdateOrdersSaga, updateOrdersSaga } from "./orders";
-import WebsocketUpdater from "../WebsocketUpdater";
+import { WebsocketUpdater } from "../WebsocketUpdater";
 
 function* checkConnectionStatusSaga() {
   while (true) {

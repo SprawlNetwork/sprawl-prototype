@@ -1,9 +1,9 @@
 import React from "react";
 import * as datefns from "date-fns";
 import { connect } from "react-redux";
-import Order from "../components/Order";
+import { Order } from "../components/Order";
 
-function Orders({ orders, localAccount, onTakeOrder, tokens }) {
+function OrdersComponent({ orders, localAccount, onTakeOrder, tokens }) {
   const sortedOrders = Object.values(orders).sort((o1, o2) =>
     datefns.compareAsc(o1.receptionDate, o2.receptionDate)
   );
@@ -63,4 +63,4 @@ const mapStateToProps = (
   tokens
 });
 
-export default connect(mapStateToProps)(Orders);
+export const Orders = connect(mapStateToProps)(OrdersComponent);

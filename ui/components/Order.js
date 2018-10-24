@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import * as datefns from "date-fns";
 import { Amount } from "./Amount";
 
-export default class Order extends PureComponent {
+export class Order extends PureComponent {
   render() {
     let { order, number, makerToken, takerToken } = this.props;
 

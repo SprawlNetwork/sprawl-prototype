@@ -1,10 +1,10 @@
 import { applyMiddleware, createStore } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 
-import rootReducer from "./reducers";
+import { rootReducer } from "./reducers";
 import { createLogger } from "redux-logger";
 
-const configureStore = (sagaMiddleware, preloadedState) => {
+export const configureStore = (sagaMiddleware, preloadedState) => {
   const midlewares = [sagaMiddleware];
 
   /* global ENABLE_REDUX_LOGS */
@@ -18,5 +18,3 @@ const configureStore = (sagaMiddleware, preloadedState) => {
     composeWithDevTools(applyMiddleware(...midlewares))
   );
 };
-
-export default configureStore;

@@ -4,11 +4,11 @@ import { Provider } from "react-redux";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import configureStore from "./configureStore";
+import { configureStore } from "./configureStore";
 import createSagaMiddleware from "redux-saga";
 import { rootSaga } from "./sagas";
 
-import App from "./containers/App";
+import { App } from "./containers/App";
 import {
   localNetworkIdChanged,
   metamaskLoaded,
@@ -16,7 +16,7 @@ import {
 } from "./actions";
 import { EthHelper } from "../common/eth";
 import * as ethers from "ethers";
-import ErrorsBoundary from "./containers/ErrorsBoundary";
+import { ErrorsBoundary } from "./containers/ErrorsBoundary";
 import { rootSagaError } from "./actions/sagas";
 
 const sagaMiddleware = createSagaMiddleware();

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-export default class UnlockMetaMaskMessage extends Component {
+export class UnlockMetaMaskMessage extends Component {
   componentDidMount() {
     window.ethereum.enable();
   }

@@ -3,13 +3,13 @@ import chalk from "chalk";
 import { getNetworkId } from "./eth";
 import { loadOrCreateWallet } from "./wallet";
 import { encode } from "../common/messages";
-import Dex from "./Dex";
+import { Dex } from "./Dex";
 import { PeerManager } from "./peers";
 import { RPCServer } from "./rpc";
 
 const DEFUALT_NODE_PORT = 1337;
 
-export default class Node {
+export class Node {
   constructor() {
     this._rpcServer = new RPCServer();
   }

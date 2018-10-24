@@ -2,7 +2,7 @@ import { PureComponent } from "react";
 import { connectSelectors } from "../utils";
 import React from "react";
 
-class ErrorsBoundary extends PureComponent {
+class ErrorsBoundaryComponent extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -46,6 +46,6 @@ Components stack:${this.state.renderErrorInfo.componentStack}`;
   }
 }
 
-export default connectSelectors({ error: state => state.rootSagaError })(
-  ErrorsBoundary
-);
+export const ErrorsBoundary = connectSelectors({
+  error: state => state.rootSagaError
+})(ErrorsBoundaryComponent);

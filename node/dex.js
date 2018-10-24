@@ -9,7 +9,7 @@ import { EthHelper } from "../common/eth";
 import * as ethers from "ethers";
 import { getEthereumRPCURL } from "./eth";
 
-export default class Dex {
+export class Dex {
   constructor(wallet, networkId, peerManager, broadcastToClients) {
     this._networkId = networkId;
     this._peerManager = peerManager;

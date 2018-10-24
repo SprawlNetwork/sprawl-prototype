@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { makeOrderFailureDismiss, makeOrderFailure } from "../actions/index";
 import { BigNumber } from "@0xproject/utils";
 
-class MakeOrder extends PureComponent {
+class MakeOrderComponent extends PureComponent {
   onSubmit = e => {
     e.preventDefault();
 
@@ -189,4 +189,4 @@ const mapStateToProps = (
   tokens
 });
 
-export default connect(mapStateToProps)(MakeOrder);
+export const MakeOrder = connect(mapStateToProps)(MakeOrderComponent);

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 const ROPSTEN_NETWORK_ID = 3;
 
-export default class ChangeMetaMaskNetwork extends Component {
+export class ChangeMetaMaskNetwork extends Component {
   render() {
     return (
       <div className="overlay-message">

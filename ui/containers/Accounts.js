@@ -1,11 +1,11 @@
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 
-import AccountCard from "../components/AccountCard";
-import Faucet from "../components/Faucet";
+import { AccountCard } from "../components/AccountCard";
+import { Faucet } from "../components/Faucet";
 import { tokenFaucetRequested, tokenSetAllowanceRequest } from "../actions";
 
-class Accounts extends PureComponent {
+class AccountsComponent extends PureComponent {
   render() {
     let { localAccount, remoteAccount, tokens } = this.props;
 
@@ -74,4 +74,4 @@ const mapStateToProps = ({ localAccount, remoteAccount, errors, tokens }) => ({
   tokens
 });
 
-export default connect(mapStateToProps)(Accounts);
+export const Accounts = connect(mapStateToProps)(AccountsComponent);
