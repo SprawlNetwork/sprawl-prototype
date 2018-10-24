@@ -56,7 +56,7 @@ function* updateValue(
 
       const { updated, timeout } = yield race({
         updated: call(updatedValueGetter),
-        timeout: call(delay, 3000, true)
+        timeout: call(delay, 5000, true)
       });
 
       if (timeout) {
