@@ -65,13 +65,13 @@ function* updateValue(
 
       // Sometimes the message about unlocking metamask is always shown.
       // This is here to help debug that, as it's not reproducible
-      if (title === "local account address") {
-        const metamaskUnlocked = yield select(metaMaskUnlocked);
-
-        if (!metamaskUnlocked) {
-          console.log("Metamask is locked", current, updated);
-        }
-      }
+      // if (title === "local account address") {
+      //   const metamaskUnlocked = yield select(metaMaskUnlocked);
+      //
+      //   if (!metamaskUnlocked) {
+      //     console.log("Metamask is locked", current, updated);
+      //   }
+      // }
 
       if (!arEqual(current, updated)) {
         yield put(successActionCreator(updated));
