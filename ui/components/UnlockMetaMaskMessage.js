@@ -2,7 +2,9 @@ import React, { Component } from "react";
 
 export class UnlockMetaMaskMessage extends Component {
   componentDidMount() {
-    window.ethereum.enable();
+    if (window.ethereum) {
+      window.ethereum.enable();
+    }
   }
 
   render() {
